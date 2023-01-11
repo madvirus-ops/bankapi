@@ -38,5 +38,13 @@ async def create_post(post:schemas.Posts,db:Session=Depends(get_db)):
 
 
 
-    
+@router.delete("/{id}",status_code=status.HTTP_204_NO_CONTENT)
+async def delete_post(id:int,db:Session= Depends(get_db)):
+    post = db.query(models.BlogModel).filter(models.BlogModel.id == id)
+    post.delete(synchronize_session=False)
+    db.commit()
+    return {"post deleted successfully"}
+
+
+
 
