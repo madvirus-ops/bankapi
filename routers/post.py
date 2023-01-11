@@ -48,3 +48,10 @@ async def delete_post(id:int,db:Session= Depends(get_db)):
 
 
 
+@router.put("/{id}",status_code=status.HTTP_202_ACCEPTED)
+async def update(id:int,request:schemas.Posts,db:Session= Depends(get_db)):
+    post = db.query(models.BlogModel).filter(models.BlogModel.id == id)
+    post.update(request.dict(exclude_unset=True))
+    db.commit()
+    return {"post updated"}
+    
