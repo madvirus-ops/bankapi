@@ -18,5 +18,16 @@ async def list_post(limit=10,db:Session=Depends(get_db)):
     return post
 
 
+@router.get("/{id}",status_code=status.HTTP_302_FOUND)
 
+async def get_post_by_id(id:int,db:Session=Depends(get_db)):
+    """get post by specific id"""
+    post = get_object_or_404(models.BlogModel,id,db)
+    return post
+
+
+
+
+
+    
 
