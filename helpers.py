@@ -10,3 +10,6 @@ def get_object_or_404(model,id,db):
         return object
     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"object with id {id} is not foumd")
 
+
+def hash_password():
+    pass
