@@ -41,6 +41,8 @@ async def create_post(post:schemas.Posts,db:Session=Depends(get_db)):
 @router.delete("/{id}",status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post(id:int,db:Session= Depends(get_db)):
     post = db.query(models.BlogModel).filter(models.BlogModel.id == id)
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"post with id {id} not found")
     post.delete(synchronize_session=False)
     db.commit()
     return {"post deleted successfully"}
@@ -51,7 +53,10 @@ async def delete_post(id:int,db:Session= Depends(get_db)):
 @router.put("/{id}",status_code=status.HTTP_202_ACCEPTED)
 async def update(id:int,request:schemas.Posts,db:Session= Depends(get_db)):
     post = db.query(models.BlogModel).filter(models.BlogModel.id == id)
+    if not post:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"post with id {id} not found")
     post.update(request.dict(exclude_unset=True))
     db.commit()
     return {"post updated"}
     
+
