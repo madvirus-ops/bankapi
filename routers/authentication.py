@@ -35,26 +35,32 @@ async def log_user_in(request:schemas.Login,response:Response,db:Session = Depen
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Password")
 
     #generate jwt token
-    access_token=Authorize.create_access_token(subject=user.email, expires_time=timedelta(minutes=ACCESS_TOKEN_LIFETIME_MINUTES))
-    refresh_token=Authorize.create_refresh_token(subject=user.email, expires_time=timedelta(days=REFRESH_TOKEN_LIFETIME))
-    response.set_cookie(key='access_token',value=access_token, expires=access_cookies_time, max_age=access_cookies_time, httponly=True)
-    response.set_cookie(key='refresh_token',value=refresh_token, expires=refresh_cookies_time, max_age=refresh_cookies_time, httponly=True)
-    return {'access_token':access_token, 'refresh_token':refresh_token, 'user':user}
+    
  
 
 
-@router.post('/refresh-token', summary='enpoint to get new access token')
-def refresh_token(response:Response,Authorization:AuthJWT=Depends(), refresh_token:str=Cookie(default=None), Bearer:str=Header(default=None)):
-    '''
-    To get new access token the refresh token giving during signup must be passed in the header or sent with the cookie.
-    its preferable to pass to make use of the cookie because it's httponly which prevents clients from accessing it.
-    '''
-    exception=HTTPException(status_code=401, detail='invalid refresh token or token has expired')
-    try:
-        Authorization.jwt_refresh_token_required()
-        current_user=Authorization.get_jwt_subject()
-        access_token=Authorization.create_access_token(current_user)
-        response.set_cookie(key='access_token',value=access_token, expires=access_cookies_time, max_age=access_cookies_time, httponly=True)
-        return {'access_token':access_token}
-    except:
-        raise exception
+# @router.post('/refresh-token', summary='enpoint to get new access token')
+# def refresh_token(response:Response,Authorization:AuthJWT=Depends(), refresh_token:str=Cookie(default=None), Bearer:str=Header(default=None)):
+#     '''
+#     To get new access token the refresh token giving during signup must be passed in the header or sent with the cookie.
+#     its preferable to pass to make use of the cookie because it's httponly which prevents clients from accessing it.
+#     '''
+#     exception=HTTPException(status_code=401, detail='invalid refresh token or token has expired')
+#     try:
+#         Authorization.jwt_refresh_token_required()
+#         current_user=Authorization.get_jwt_subject()
+#         access_token=Authorization.create_access_token(current_user)
+#         response.set_cookie(key='access_token',value=access_token, expires=access_cookies_time, max_age=access_cookies_time, httponly=True)
+#         return {'access_token':access_token}
+#     except:
+#         raise exception
+
+
+
+
+
+# access_token=Authorize.create_access_token(subject=user.email, expires_time=timedelta(minutes=ACCESS_TOKEN_LIFETIME_MINUTES))
+#     refresh_token=Authorize.create_refresh_token(subject=user.email, expires_time=timedelta(days=REFRESH_TOKEN_LIFETIME))
+#     response.set_cookie(key='access_token',value=access_token, expires=access_cookies_time, max_age=access_cookies_time, httponly=True)
+#     response.set_cookie(key='refresh_token',value=refresh_token, expires=refresh_cookies_time, max_age=refresh_cookies_time, httponly=True)
+#     return {'access_token':access_token, 'refresh_token':refresh_token, 'user':user}
