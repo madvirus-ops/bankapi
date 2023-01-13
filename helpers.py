@@ -1,7 +1,9 @@
-from fastapi import status,HTTPException
+from fastapi import status,HTTPException,Cookie,Header,Depends
 from passlib.context import CryptContext
 import models
 from sqlalchemy.orm import Session
+from fastapi_jwt_auth import AuthJWT
+from database import get_db
 
 
 
@@ -29,4 +31,21 @@ def verify_password(plain_password,hashed_password):
 def get_user_by_email(email,db:Session):
     user = db.query(models.UserModel).filter(models.UserModel.email == email).first()
     return user
+
+
+def get_user_by_id(id:str,db:Session):
+    user = db.query(models.UserModel).filter(models.UserModel.id == id).first()
+    return user
    
+
+
+def get_current_user(Authorize:AuthJWT=Depends(), db:Session=Depends(get_db), access_token:str=Cookie(default=None),Bearer=Header(default=None)):
+    exception=HTTPException(status_code=401, detail='invalid access token or access token has expired', headers={'WWW-Authenticate': 'Bearer'})
+
+    try:
+        Authorize.jwt_required()
+        user_email=Authorize.get_jwt_subject()
+        user=get_user_by_email(user_email,db)
+        return user
+    except:
+        raise exception

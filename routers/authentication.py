@@ -35,8 +35,8 @@ async def log_user_in(request:schemas.Login,response:Response,db:Session = Depen
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Password")
 
     #generate jwt token
-    access_token=Authorize.create_access_token(subject=user.id, expires_time=timedelta(minutes=ACCESS_TOKEN_LIFETIME_MINUTES))
-    refresh_token=Authorize.create_refresh_token(subject=user.id, expires_time=timedelta(days=REFRESH_TOKEN_LIFETIME))
+    access_token=Authorize.create_access_token(subject=user.email, expires_time=timedelta(minutes=ACCESS_TOKEN_LIFETIME_MINUTES))
+    refresh_token=Authorize.create_refresh_token(subject=user.email, expires_time=timedelta(days=REFRESH_TOKEN_LIFETIME))
     response.set_cookie(key='access_token',value=access_token, expires=access_cookies_time, max_age=access_cookies_time, httponly=True)
     response.set_cookie(key='refresh_token',value=refresh_token, expires=refresh_cookies_time, max_age=refresh_cookies_time, httponly=True)
     return {'access_token':access_token, 'refresh_token':refresh_token, 'user':user}
