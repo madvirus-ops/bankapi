@@ -22,6 +22,17 @@ class UserCrud():
         db.refresh(new_user)
         return new_user
 
+    @staticmethod
+    def update(id:int,db:Session,request:schemas.UserUpdate):
+        user = db.query(models.UserModel).filter(models.UserModel.id == id)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="user not found")
+        user.update(request.dict(exclude_unset=True),synchronize_session=False)
+        db.commit()
+        return "user updated"
+
+    
+
 
 
 class BlogCrud():
