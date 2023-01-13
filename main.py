@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import post,users
+from routers import post,users,authentication
 import models
 from database import engine
 
@@ -9,6 +9,7 @@ app = FastAPI(title="Banke App",description="mimicking the backend of basic fint
 
 models.Base.metadata.create_all(bind=engine)
 
+app.include_router(authentication.router)
 app.include_router(post.router)
 app.include_router(users.router)
 

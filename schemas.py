@@ -24,3 +24,8 @@ class ShowUser(BaseModel):
 class UserUpdate(BaseModel):
     name:str
     email:str
+
+
+class Login(BaseModel):
+    username:str
+    password:str
