@@ -30,7 +30,7 @@ async def get_post_by_id(id:int,db:Session=Depends(get_db)):
 @router.post("/",status_code=status.HTTP_201_CREATED)
 async def create_post(post:schemas.Posts,db:Session=Depends(get_db)):
     """create a new blogpost"""
-    new_post = models.BlogModel(title=post.title,body=post.content)
+    new_post = models.BlogModel(title=post.title,body=post.body,user_id=1)
     db.add(new_post)
     db.commit()
     db.refresh(new_post)

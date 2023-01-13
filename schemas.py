@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-
+from typing import List
 
 class Posts(BaseModel):
     title:str
@@ -12,4 +12,12 @@ class User(BaseModel):
     password1:str
     password2:str
 
+
+class ShowUser(BaseModel):
+    name: str
+    email:str
+    blogs:List
+
+    class Config():
+        orm_mode = True
 

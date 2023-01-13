@@ -18,5 +18,5 @@ def hash_password(password):
     return hashed_password
 
 def verify_password(hashed_password,password):
-    # pwd = pwd_context.verify()
-    pass
+    return pwd_context.verify(hashed_password,password)
+   
