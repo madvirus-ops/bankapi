@@ -4,7 +4,7 @@ import schemas
 import models
 from sqlalchemy.orm import Session
 from helpers import get_object_or_404
-
+from crud import BlogCrud
 
 router = APIRouter(prefix='/api/v1/post',tags=['post'])
 
@@ -29,34 +29,20 @@ async def get_post_by_id(id:int,db:Session=Depends(get_db)):
 
 @router.post("/",status_code=status.HTTP_201_CREATED)
 async def create_post(post:schemas.Posts,db:Session=Depends(get_db)):
-    """create a new blogpost"""
-    new_post = models.BlogModel(title=post.title,body=post.body,user_id=1)
-    db.add(new_post)
-    db.commit()
-    db.refresh(new_post)
+    new_post = BlogCrud.create_post(post,db)
     return new_post
 
 
 
 @router.delete("/{id}",status_code=status.HTTP_204_NO_CONTENT)
 async def delete_post(id:int,db:Session= Depends(get_db)):
-    post = db.query(models.BlogModel).filter(models.BlogModel.id == id)
-    if not post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"post with id {id} not found")
-    post.delete(synchronize_session=False)
-    db.commit()
-    return {"post deleted successfully"}
+    return BlogCrud.delete(db,id)
 
 
 
 
 @router.put("/{id}",status_code=status.HTTP_202_ACCEPTED)
 async def update(id:int,request:schemas.Posts,db:Session= Depends(get_db)):
-    post = db.query(models.BlogModel).filter(models.BlogModel.id == id)
-    if not post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"post with id {id} not found")
-    post.update(request.dict(exclude_unset=True))
-    db.commit()
-    return {"post updated"}
+    return BlogCrud.update(db,id,request)
     
 

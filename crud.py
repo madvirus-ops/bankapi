@@ -21,3 +21,37 @@ class UserCrud():
         db.commit()
         db.refresh(new_user)
         return new_user
+
+
+
+class BlogCrud():
+
+
+    @staticmethod
+    def create_post(post:schemas.Posts,db:Session):
+        """create a new blogpost"""
+        new_post = models.BlogModel(title=post.title,body=post.body,user_id=1)
+        db.add(new_post)
+        db.commit()
+        db.refresh(new_post)
+        return new_post
+
+
+    @staticmethod
+    def delete(db:Session,id:int,):
+        post = db.query(models.BlogModel).filter(models.BlogModel.id == id)
+        if not post:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"post with id {id} not found")
+        post.delete(synchronize_session=False)
+        db.commit()
+        return {"post deleted successfully"}
+
+
+    @staticmethod
+    def update(db:Session,id:int,request):
+        post = db.query(models.BlogModel).filter(models.BlogModel.id == id)
+        if not post:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"post with id {id} not found")
+        post.update(request.dict(exclude_unset=True))
+        db.commit()
+        return {"post updated"}

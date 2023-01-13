@@ -21,3 +21,6 @@ class ShowUser(BaseModel):
     class Config():
         orm_mode = True
 
+class UserUpdate(Basemodel):
+    name:str
+    email:str
