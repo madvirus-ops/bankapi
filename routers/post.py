@@ -29,8 +29,8 @@ async def get_post_by_id(id:int,db:Session=Depends(get_db)):
 
 
 @router.post("/",status_code=status.HTTP_201_CREATED)
-async def create_post(user:dict = Depends(get_current_user),post:schemas.Posts,db:Session=Depends(get_db)):
-    new_post = BlogCrud.create_post(post,db,user)
+async def create_post(post:schemas.Posts,user:dict = Depends(get_current_user),db:Session=Depends(get_db)):
+    new_post = BlogCrud.create_post(post=post,db=db,user=user)
     return new_post
 
 
