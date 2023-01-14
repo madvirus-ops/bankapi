@@ -1,6 +1,7 @@
 from pydantic import BaseModel
 from typing import List
 from fastapi_jwt_auth import AuthJWT
+from typing import Optional
 
 class Posts(BaseModel):
     title:str
@@ -43,3 +44,7 @@ class Settings(BaseModel):
 @AuthJWT.load_config
 def get_config():
     return Settings()
+
+
+class TokenData(BaseModel):
+    email: Optional[str] = None

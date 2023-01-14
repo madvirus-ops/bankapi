@@ -41,8 +41,12 @@ def get_user_by_id(id:str,db:Session):
    
 
 
-def get_current_user(Authorize:AuthJWT=Depends(), db:Session=Depends(get_db), access_token:str=Cookie(default=None),Bearer=Header(default=None)):
+def get_current_user2(Authorize:AuthJWT=Depends(), db:Session=Depends(get_db), access_token:str=Cookie(default=None),Bearer=Header(default=None)):
     exception=HTTPException(status_code=401, detail='invalid access token or access token has expired', headers={'WWW-Authenticate': 'Bearer'})
+
+    """
+        this function uses python fastapi_jwt and its login route is api/v1/login/v2
+    """
 
     try:
         Authorize.jwt_required()
