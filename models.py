@@ -23,3 +23,14 @@ class UserModel(Base):
     password = Column(String) 
 
     blogs = relationship("BlogModel",back_populates="owner")
+
+
+class Banks(Base):
+    __tablename__ = 'banks'
+    id = Column(Integer,primary_key=True,index=True)
+    bank_id = Column(Integer)
+    code = Column(String)
+    name = Column(String)
+
+
+

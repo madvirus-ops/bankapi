@@ -48,3 +48,11 @@ def get_config():
 
 class TokenData(BaseModel):
     email: Optional[str] = None
+
+
+class BankResponse(BaseModel):
+    bank_id:int
+    code:str
+    name:str
+    class Config():
+        orm_mode = True
