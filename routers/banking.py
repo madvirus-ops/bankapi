@@ -12,6 +12,7 @@ secret_key = 'FLWSECK_TEST-8f12c4531edd3b947bbdbf9810097137-X'
 router = APIRouter(prefix="/api/v1/core-banking",tags=['banking'])
 
 
+
 @router.get("/banks/flutterwave")
 async def get_banks(db:Session = Depends(get_db)):
     """no longer needed"""
@@ -29,6 +30,7 @@ async def get_banks(db:Session = Depends(get_db)):
         db.commit()
 
     return banks
+    
 
 
 @router.get("/banks/")
