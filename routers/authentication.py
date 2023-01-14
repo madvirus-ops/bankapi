@@ -48,7 +48,7 @@ async def log_user_in(response:Response,request:OAuth2PasswordRequestForm = Depe
 
     
  
-@router.post("/login/v2")
+@router.post("/v2/login",)
 async def login_jwt(response:Response,request:schemas.Login,db:Session = Depends(get_db),Authorize:AuthJWT=Depends()):
     """second route to login using schemas and also sets some shits wiht refresh and access toeken"""
     user = get_user_by_email(request.username,db)

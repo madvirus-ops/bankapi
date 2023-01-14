@@ -39,9 +39,9 @@ class BlogCrud():
 
 
     @staticmethod
-    def create_post(post:schemas.Posts,db:Session):
+    def create_post(post:schemas.Posts,db:Session,user:dict):
         """create a new blogpost"""
-        new_post = models.BlogModel(title=post.title,body=post.body,user_id=1)
+        new_post = models.BlogModel(title=post.title,body=post.body,user_id=user.id)
         db.add(new_post)
         db.commit()
         db.refresh(new_post)
