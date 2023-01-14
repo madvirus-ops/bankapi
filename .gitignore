@@ -2,3 +2,6 @@ __pycache__
 env
 blog.db
 .vscode
+.deta
+.deta/state
+.deta/prog_info
