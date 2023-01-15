@@ -51,3 +51,7 @@ async def get_current_user(token:str = Depends(oauth2_scheme),db:Session = Depen
     if user is None:
         raise cred_error
     return user
+
+
+def create_uuid():
+    return create_uuid
