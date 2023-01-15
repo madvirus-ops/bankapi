@@ -5,6 +5,7 @@ from database import get_db
 from sqlalchemy.orm import Session
 from utils import get_current_user
 import schemas
+import uuid
 import os
 from dotenv import load_dotenv
 load_dotenv()
@@ -57,15 +58,81 @@ async def Validate_Account(request:schemas.ValidateAccount,user:dict = Depends(g
     try:
         response = requests.get(url=url,headers=Headers)
         res = []
-        res.append(response.json())
-        data = res[0]['data']
-        cus_response = {
-            "AccountNumber":data['account_number'],
-            "Accountname":data['account_name'],
-            "BankCode":request.Bank_code,
-            "BankName":bank.name,
-            "bank_id":bank.bank_id
-        }
-        return cus_response
+        if response.status_code == 200:
+
+            res.append(response.json())
+            data = res[0]['data']
+            cus_response = {
+                "AccountNumber":data['account_number'],
+                "Accountname":data['account_name'],
+                "BankCode":request.Bank_code,
+                "BankName":bank.name,
+                "bank_id":bank.bank_id
+            }
+            return cus_response
+        else:
+            raise HTTPException(status_code=response.status_code,detail=response.json())
     except Exception as e:
-        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail=f"{e},  {response.reason}")
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail=f"{e}")
+
+
+
+reference_codes = {}
+
+@router.post("/bankTransfer")
+async def transfer(request:schemas.TransferFund,user:dict = Depends(get_current_user)):
+    rec_url = "https://api.paystack.co/transferrecipient"
+    trf_url = "https://api.paystack.co/transfer"
+    if request.beneficiaryAccountNumber in reference_codes:
+        reference = reference_codes[request.beneficiaryAccountNumber]
+    else:
+        # Generate a unique reference code
+        reference = str(uuid.uuid4())
+        reference_codes[request.beneficiaryAccountNumber] = reference
+
+    headers = {
+        'Authorization': f'Bearer {py_secret_key}',
+        'Content-Type': 'application/json'
+    }
+
+    data = {
+        "type":"nuban",
+        "name" : request.beneficiaryAccountName,
+        "account_number": request.beneficiaryAccountNumber,
+        "bank_code": request.beneficiaryBankCode,
+        "currency": "NGN"
+    }
+
+    create_receiver = requests.post(url=rec_url,headers=headers,json=data)
+    if create_receiver.status_code == 201:
+        res = []
+        res.append(create_receiver.json())
+        recipient = res[0]['data']['recipient_code']
+        trf_data = { 
+                    "source": "balance", 
+                    "amount": request.amount,
+                    "reference": reference, 
+                    "recipient": recipient, 
+                    "reason": request.narration 
+                }
+        transfer = requests.post(trf_url,headers=headers,json=trf_data)
+        if transfer.status_code == 200:
+            return transfer.json()
+        
+        return transfer.json()
+
+    # elif create_receiver.status_code == 200:
+    #     res = []
+    #     res.append(create_receiver.json())
+    #     nam = res[0]['data']['recipient_code']
+    #     # transfer = request.post
+    #     resp = {
+    #         "name":nam
+    #     }
+        
+    #     return resp
+    else:
+        raise HTTPException(status_code=create_receiver.status_code,detail="something went wrong")
+
+
+    
