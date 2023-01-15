@@ -66,3 +66,10 @@ class ValidateAccount(BaseModel):
 
 
 
+class TransferFund(BaseModel):
+    amount:float
+    currencyCode :str
+    narration :str
+    beneficiaryAccountName:str
+    beneficiaryAccountNumber:str
+    beneficiaryBankCode: str
