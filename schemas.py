@@ -60,3 +60,16 @@ class BankResponse(BaseModel):
 class ValidateAccount(BaseModel):
     Bank_code:str
     account_number:int
+
+
+
+
+
+
+class TransferFund(BaseModel):
+    amount:float
+    currencyCode :str
+    narration :str
+    beneficiaryAccountName:str
+    beneficiaryAccountNumber:str
+    beneficiaryBankCode: str
