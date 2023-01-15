@@ -1,10 +1,9 @@
 from fastapi import status,HTTPException,Cookie,Header,Depends
 from passlib.context import CryptContext
 import models
-from datetime import datetime,timedelta
 from sqlalchemy.orm import Session
 from fastapi_jwt_auth import AuthJWT
-from typing import Optional
+import uuid
 from database import get_db
 
 
@@ -57,3 +56,6 @@ def get_current_user2(Authorize:AuthJWT=Depends(), db:Session=Depends(get_db), a
         raise exception
 
 
+def generate_uuid(name):
+    name = uuid.uuid4()
+    return name

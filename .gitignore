@@ -5,3 +5,4 @@ blog.db
 .deta
 .deta/state
 .deta/prog_info
+.env
