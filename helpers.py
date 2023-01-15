@@ -56,6 +56,6 @@ def get_current_user2(Authorize:AuthJWT=Depends(), db:Session=Depends(get_db), a
         raise exception
 
 
-# def generate_uuid(name):
-#     name = uuid.uuid4()
-#     return name
+def generate_uuid(name):
+    name = uuid.uuid4()
+    return name
