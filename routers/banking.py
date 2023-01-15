@@ -137,3 +137,33 @@ async def transfer(request:schemas.TransferFund,user:dict = Depends(get_current_
 
     
 
+@router.post("/tranfer/flutterwave")
+async def process_transfer_with_flutterwave(request:schemas.TransferFund,user:dict = Depends(get_current_user)):
+    url = "https://api.flutterwave.com/v3/transfers"
+    if request.beneficiaryAccountNumber in reference_codes:
+
+        reference = reference_codes[request.beneficiaryAccountNumber]
+    else:
+        # Generate a unique reference code
+        reference = str(uuid.uuid4())
+        reference_codes[request.beneficiaryAccountNumber] = reference
+
+    headers = {
+        'Authorization': f'Bearer {fl_secret_key}',
+        'Content-Type': 'application/json'
+    }
+    data = {
+            "account_bank": request.beneficiaryBankCode,
+            "account_number": request.beneficiaryAccountNumber,
+            "amount": request.amount,
+            "narration": request.narration,
+            "currency": request.currencyCode,
+            "reference": reference,
+            "callback_url": "https://www.flutterwave.com/ng/",
+            "debit_currency": request.currencyCode
+            }
+    transfer = requests.post(url,headers=headers,json=data)
+    if transfer.status_code == 200:
+        return transfer.json()
+    else:
+        raise HTTPException(status_code=transfer.status_code,detail=transfer.json())
