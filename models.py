@@ -32,5 +32,11 @@ class Banks(Base):
     code = Column(String)
     name = Column(String)
 
+# class UserBanks(Base):
+
+#     bank_code = Column(String)
+#     account_number = Column("")
+
+
 
 

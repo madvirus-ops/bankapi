@@ -49,3 +49,23 @@ async def get_banks_list(user:dict= Depends(get_current_user),db:Session = Depen
 
 
 
+@router.post("/validateBankAccount",status_code=status.HTTP_200_OK)
+async def Validate_Account(request:schemas.ValidateAccount,user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
+    Headers = { "Authorization" : f"Bearer {py_secret_key}" }
+    url = f"https://api.paystack.co/bank/resolve?account_number={request.account_number}&bank_code={request.Bank_code}"
+    bank = db.query(models.Banks).filter(models.Banks.code == request.Bank_code).first()
+    try:
+        response = requests.get(url=url,headers=Headers)
+        res = []
+        res.append(response.json())
+        data = res[0]['data']
+        cus_response = {
+            "AccountNumber":data['account_number'],
+            "Accountname":data['account_name'],
+            "BankCode":request.Bank_code,
+            "BankName":bank.name,
+            "bank_id":bank.bank_id
+        }
+        return cus_response
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail=f"{e},  {response.reason}")

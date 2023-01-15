@@ -56,3 +56,7 @@ class BankResponse(BaseModel):
     name:str
     class Config():
         orm_mode = True
+
+class ValidateAccount(BaseModel):
+    Bank_code:str
+    account_number:int
