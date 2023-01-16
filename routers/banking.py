@@ -178,11 +178,17 @@ async def create_virtual_account(user:dict =Depends(get_current_user),db:Session
     Headers = { "Authorization" : f"Bearer {py_secret_key}" }
     url = "https://api.paystack.co/customer"
     acct_url = "https://api.paystack.co/dedicated_account"
+    # data = { 
+    #     "email": user.email,
+    #     "first_name": user.first_name,
+    #     "last_name": user.last_name,
+    #     "phone": user.phoneNumber
+    #     }
     data = { 
-        "email": user.email,
-        "first_name": user.first_name,
-        "last_name": user.last_name,
-        "phone": user.phoneNumber
+        "email": "cos@gmail.com",
+        "first_name": "user.first_name",
+        "last_name": "user.last_name",
+        "phone": "09000000078"
         }
     customer = db.query(models.Customer).filter(models.Customer.user_id == user.id).first()
     if customer is None:
@@ -192,9 +198,10 @@ async def create_virtual_account(user:dict =Depends(get_current_user),db:Session
 
             if create_customer.status_code == 200:
                 res = []
-                res.append(create_customer)
+                res.append(create_customer.json())
+                # return res
                 customer = models.Customer(user_id = user.id,customer_id = res[0]['data']['customer_code'])
-                return res
+                # return res
                 db.add(customer)
                 db.commit()
                 db.refresh(customer)
