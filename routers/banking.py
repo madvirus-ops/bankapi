@@ -172,3 +172,41 @@ async def process_transfer_with_flutterwave(request:schemas.TransferFund,user:di
         raise HTTPException(status_code=transfer.status_code,detail=transfer.json())
 
 
+
+@router.post("/virtual-account")
+async def create_virtual_account(user:dict =Depends(get_current_user),db:Session = Depends(get_db)):
+    Headers = { "Authorization" : f"Bearer {py_secret_key}" }
+    url = "https://api.paystack.co/customer"
+    acct_url = "https://api.paystack.co/dedicated_account"
+    data = { 
+        "email": user.email,
+        "first_name": user.first_name,
+        "last_name": user.last_name,
+        "phone": user.phoneNumber
+        }
+    customer = db.query(models.Customer).filter(models.Customer.user_id == user.id).first()
+    if customer is None:
+        #if the customer does not exist create a new customer
+        try:
+            create_customer = requests.post(url,headers=Headers,json=data)
+
+            if create_customer.status_code == 200:
+                res = []
+                res.append(create_customer)
+                customer = models.Customer(user_id = user.id,customer_id = res[0]['data']['customer_code'])
+                return res
+                db.add(customer)
+                db.commit()
+                db.refresh(customer)
+            else:
+                raise HTTPException(status_code=create_customer.status_code,detail=create_customer.json())
+        except Exception as e:
+            return e
+    cus_data ={ "customer": customer.customer_id, "preferred_bank": "test-bank"}
+    virtual_account = requests.post(acct_url,headers=Headers,json=cus_data)
+    if virtual_account.status_code == 200:
+        return virtual_account.json()
+    else:
+        raise HTTPException(status_code=virtual_account.status_code,detail=virtual_account.json())
+
+

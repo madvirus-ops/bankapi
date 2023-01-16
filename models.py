@@ -34,6 +34,12 @@ class Banks(Base):
     code = Column(String)
     name = Column(String)
 
+
+class Customer(Base):
+    __tablename__ = "customers"
+    id = Column(Integer,primary_key=True,index=True)
+    user_id = Column(Integer,ForeignKey('Users.id'))
+    customer_id = Column(String)
 # class UserBanks(Base):
 
 #     bank_code = Column(String)
