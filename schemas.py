@@ -9,8 +9,10 @@ class Posts(BaseModel):
     
 
 class User(BaseModel):
-    name:str
+    first_name:str
+    last_name:str
     email:str
+    phoneNumber:str
     password1:str
     password2:str
 
@@ -73,3 +75,8 @@ class TransferFund(BaseModel):
     beneficiaryAccountName:str
     beneficiaryAccountNumber:str
     beneficiaryBankCode: str
+
+
+class KudaKey(BaseModel):
+    email:str
+    api_key: Optional[str] = None
