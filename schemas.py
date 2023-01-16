@@ -10,7 +10,10 @@ class Posts(BaseModel):
 
 class User(BaseModel):
     name:str
+    first_name:str
+    last_name:str
     email:str
+    phoneNumber:str
     password1:str
     password2:str
 

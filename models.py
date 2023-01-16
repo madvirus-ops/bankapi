@@ -18,8 +18,10 @@ class UserModel(Base):
     __tablename__ = 'Users'
 
     id = Column(Integer,primary_key=True,index=True)
-    name = Column(String)
+    first_name = Column(String)
+    last_name = Column(String)
     email = Column(String,unique=True)
+    phoneNumber = Column(String)
     password = Column(String) 
 
     blogs = relationship("BlogModel",back_populates="owner")

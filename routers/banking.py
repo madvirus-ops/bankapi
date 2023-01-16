@@ -13,8 +13,11 @@ load_dotenv()
 #test keys
 py_secret_key =os.getenv("PAYSTACK_SECRET_KEY")
 fl_secret_key = os.getenv("FLUTTERWAVE_SECRET_KEY")
+kd_secret_key = os.getenv("KUDA_API_KEY")
 
 router = APIRouter(prefix="/api/v1/core-banking",tags=['banking'])
+
+kuda_base_url = "https://kuda-openapi-uat.kudabank.com/v​2"
 
 
 
@@ -167,3 +170,5 @@ async def process_transfer_with_flutterwave(request:schemas.TransferFund,user:di
         return transfer.json()
     else:
         raise HTTPException(status_code=transfer.status_code,detail=transfer.json())
+
+
