@@ -3,6 +3,7 @@ from fastapi import APIRouter,status,Depends,HTTPException
 import models
 from database import get_db
 from sqlalchemy.orm import Session
+import base64
 from utils import get_current_user
 import schemas
 import uuid
@@ -14,6 +15,9 @@ load_dotenv()
 py_secret_key =os.getenv("PAYSTACK_SECRET_KEY")
 fl_secret_key = os.getenv("FLUTTERWAVE_SECRET_KEY")
 kd_secret_key = os.getenv("KUDA_API_KEY")
+kd_email = os.getenv("KUDA_EMAIL")
+mn_api_key = os.getenv("MONIFY_API_KEY")
+mn_secret_key = os.getenv("MONIFY_SECRET_KEY")
 
 router = APIRouter(prefix="/api/v1/core-banking",tags=['banking'])
 
@@ -217,4 +221,92 @@ async def create_virtual_account(user:dict =Depends(get_current_user),db:Session
         raise HTTPException(status_code=virtual_account.status_code,detail=virtual_account.json())
 
 
-#for Monify and beyond
+#for Kuda and beyond
+customer_codes = {}
+
+@router.post("/kuda/virtual-account",status_code=status.HTTP_201_CREATED)
+async def create_kuda_virtual_account(user:dict =Depends(get_current_user),db:Session = Depends(get_db)):
+    auth_url = 'https://kuda-openapi-uat.kudabank.com/v2.1/Account/GetToken'
+
+    auth_data = {
+        "email": kd_email,
+        "apiKey": kd_secret_key
+    }
+
+
+    auth_code = requests.post(auth_url,json=auth_data)
+    if auth_code.status_code == 200:
+        return auth_code.text
+
+        if user.email in reference_codes:
+            reference =customer_codes[user.email]
+        else:
+            # Generate a unique reference code
+            reference = str(uuid.uuid4())
+            customer_codes[user.email] = reference
+    return auth_code.text
+
+
+
+from monnify.monnify import MonnifyCredential, Monnify
+reserve = Monnify()
+wallet_id = "9468315843"
+contract_code = "8220807769"
+monnify_credential = MonnifyCredential(mn_api_key,mn_secret_key,contract_code,wallet_id,is_live=False)
+
+account_refference = {}
+@router.post("/monnify/virtual-account",status_code=status.HTTP_201_CREATED)
+async def create_monify_account(request:schemas.Bvnreq,user:dict =Depends(get_current_user),db:Session = Depends(get_db)):
+    #first authenticate
+    #  bank = reserve.verify_account(
+    #    monnify_credential, 
+    #    accountNumber='3121248964', 
+    #    bankCode='011'
+    #    )
+    if user.email in reference_codes:
+        reference =account_refference[user.email]
+    else:
+            # Generate a unique reference code
+            reference = str(uuid.uuid4())
+            account_refference[user.email] = reference
+    #  print(bank)
+    data = []
+    reserve_account = reserve.reserve_account( 
+       monnify_credential, 
+       accountReference=reference, 
+       accountName=f"{user.first_name} {user.last_name}", 
+       customerEmail=user.email, 
+       customerName=f"{user.first_name} {user.last_name}", 
+       customerBvn="22460922681",#request.bvn,
+       availableBank=True
+       )
+    data.append(reserve_account)
+    accounts = []
+    accounts.append(data[0]["responseBody"]["accounts"])
+    # accounts.append(data[0]["responseBody"]["accountReference"])
+
+    for key in accounts:
+        try:
+            add_account = models.UserReservedAccount(
+                user_id = user.id,
+                bank_code = key[0]["bankCode"],
+                bank_name= key[0]["bankName"],
+                AccountName = key[0]["accountName"],
+                AccountNumber = key[0]["accountNumber"],
+
+            )
+            db.add(add_account)
+            db.commit()
+            db.refresh(add_account)
+        except Exception as e:
+            print(e)
+    # acct_ref = models.AccountRef(user_id = user.id,accountReference= data[0]["responseBody"]["accountReference"])
+    # db.add(acct_ref)
+    # db.commit()
+    # db.refresh(acct_ref)
+
+    
+    return {"reference":accounts,"accounts":add_account}
+
+    print(reserve_account)
+ 

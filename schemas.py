@@ -80,3 +80,6 @@ class TransferFund(BaseModel):
 class KudaKey(BaseModel):
     email:str
     api_key: Optional[str] = None
+
+class Bvnreq(BaseModel):
+    bvn:str
