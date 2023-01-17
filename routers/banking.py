@@ -277,15 +277,36 @@ async def create_monify_account(request:schemas.Bvnreq,user:dict =Depends(get_cu
        accountName=f"{user.first_name} {user.last_name}", 
        customerEmail=user.email, 
        customerName=f"{user.first_name} {user.last_name}", 
-       customerBvn=request.bvn,
+       customerBvn="22460922681",#request.bvn,
        availableBank=True
        )
     data.append(reserve_account)
-    accounts = data[0]["responseBody"]["accounts"]
+    accounts = []
+    accounts.append(data[0]["responseBody"]["accounts"])
+    # accounts.append(data[0]["responseBody"]["accountReference"])
 
-    for key in account:
-        add_account = models.UserReservedAccount()
-    return accounts
+    for key in accounts:
+        try:
+            add_account = models.UserReservedAccount(
+                user_id = user.id,
+                bank_code = key[0]["bankCode"],
+                bank_name= key[0]["bankName"],
+                AccountName = key[0]["accountName"],
+                AccountNumber = key[0]["accountNumber"],
+
+            )
+            db.add(add_account)
+            db.commit()
+            db.refresh(add_account)
+        except Exception as e:
+            print(e)
+    # acct_ref = models.AccountRef(user_id = user.id,accountReference= data[0]["responseBody"]["accountReference"])
+    # db.add(acct_ref)
+    # db.commit()
+    # db.refresh(acct_ref)
+
+    
+    return {"reference":accounts,"accounts":add_account}
 
     print(reserve_account)
  
