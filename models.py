@@ -49,6 +49,18 @@ class AccountRef(Base):
     reference = Column(String)
 
 
+class UserReservedAccount(Base):
+    __tablename__ = "user_accounts"
+    id = Column(Integer,primary_key=True,index=True)
+    user_id = Column(Integer,ForeignKey('Users.id'))
+    reference = Column(String)
+    bank_code = Column(String)
+    bank_name = Column(String)
+    AccountNumber = Column(String)
+    AccountName = Column(String)
+
+
+
 
 
 
