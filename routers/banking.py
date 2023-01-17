@@ -250,8 +250,8 @@ async def create_kuda_virtual_account(user:dict =Depends(get_current_user),db:Se
 
 from monnify.monnify import MonnifyCredential, Monnify
 reserve = Monnify()
-wallet_id = "9468315843"
-contract_code = "8220807769"
+wallet_id = os.getenv("WALLET_ID")
+contract_code = os.getenv("CONTRACT_CODE")
 monnify_credential = MonnifyCredential(mn_api_key,mn_secret_key,contract_code,wallet_id,is_live=False)
 
 account_refference = {}
@@ -271,13 +271,13 @@ async def create_monify_account(request:schemas.Bvnreq,user:dict =Depends(get_cu
             account_refference[user.email] = reference
     #  print(bank)
     data = []
-    reserve_account = reserve.reserve_account( 
+    reserve_account =  reserve.reserve_account( 
        monnify_credential, 
        accountReference=reference, 
        accountName=f"{user.first_name} {user.last_name}", 
        customerEmail=user.email, 
        customerName=f"{user.first_name} {user.last_name}", 
-       customerBvn="22460922681",#request.bvn,
+       customerBvn= request.bvn,
        availableBank=True
        )
     data.append(reserve_account)
