@@ -236,7 +236,7 @@ async def create_kuda_virtual_account(user:dict =Depends(get_current_user),db:Se
 
     auth_code = requests.post(auth_url,json=auth_data)
     if auth_code.status_code == 200:
-        return auth_code.json()
+        return auth_code.text
 
         if user.email in reference_codes:
             reference =customer_codes[user.email]
@@ -244,7 +244,7 @@ async def create_kuda_virtual_account(user:dict =Depends(get_current_user),db:Se
             # Generate a unique reference code
             reference = str(uuid.uuid4())
             customer_codes[user.email] = reference
-    return auth_code.json()
+    return auth_code.text
 
 
 
