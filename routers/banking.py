@@ -217,4 +217,7 @@ async def create_virtual_account(user:dict =Depends(get_current_user),db:Session
         raise HTTPException(status_code=virtual_account.status_code,detail=virtual_account.json())
 
 
-#for Monify and beyond
+#for Kuda and beyond
+
+
+

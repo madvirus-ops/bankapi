@@ -30,31 +30,31 @@ async def update_user(id:int,request:schemas.UserUpdate,db:Session = Depends(get
     return UserCrud.update(id,db,request)
 
 
-@router.post("/kuda-token")
-async def get_user_token(request:schemas.KudaKey):
-    dataa = {}
-    url = 'https://kuda-openapi.kuda.com/v2.1/Account/GetToken'
-    dataa['email'] = request.email
-    headers = {
-        'Content-Type': 'application/json'
-    }
+# @router.post("/kuda-token")
+# async def get_user_token(request:schemas.KudaKey):
+#     dataa = {}
+#     url = 'http://kuda-openapi-uat.kudabank.com/v2.1/Account/GetToken'
+#     dataa['email'] = request.email
+#     headers = {
+#         'Content-Type': 'application/json'
+#     }
                 
-    if request.api_key:
-        dataa["apiKey"] = request.api_key
-    else:
-        dataa['apiKey'] = kd_secret_key
+#     if request.api_key:
+#         dataa["apiKey"] = request.api_key
+#     else:
+#         dataa['apiKey'] = kd_secret_key
 
-    data = {
-            "email":dataa['email'],
-            "apiKey":dataa['apiKey']
-        }
+#     data = {
+#             "email":dataa['email'],
+#             "apiKey":dataa['apiKey']
+#         }
 
-    try:
+#     try:
 
-        response = requests.post(url,json=data,headers=headers)
-        # if response.status_code == 200:
-        #     return response.json()
-        # else:
-        return response.json()
-    except Exception as e:
-        return e
+#         response = requests.post(url,json=data,headers=headers)
+#         # if response.status_code == 200:
+#         #     return response.json()
+#         # else:
+#         return response.json()
+#     except Exception as e:
+#         return e
