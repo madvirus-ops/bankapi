@@ -14,6 +14,7 @@ load_dotenv()
 py_secret_key =os.getenv("PAYSTACK_SECRET_KEY")
 fl_secret_key = os.getenv("FLUTTERWAVE_SECRET_KEY")
 kd_secret_key = os.getenv("KUDA_API_KEY")
+kd_email = os.getenv("KUDA_EMAIL")
 
 router = APIRouter(prefix="/api/v1/core-banking",tags=['banking'])
 
@@ -218,6 +219,26 @@ async def create_virtual_account(user:dict =Depends(get_current_user),db:Session
 
 
 #for Kuda and beyond
+customer_codes = {}
+
+@router.post("/kuda/virtual-account",status_code=status.HTTP_201_CREATED)
+async def create_kuda_virtual_account(user:dict =Depends(get_current_user),db:Session = Depends(get_db)):
+    auth_url = 'http://kuda-openapi-uat.kudabank.com/v2.1/Account/GetToken'
+
+    auth_data = {
+        "email": kd_email,
+        "apiKey": kd_secret_key
+    }
 
 
+    auth_code = requests.post(auth_url,json=auth_data)
+    if auth_code.status_code == 200:
+        return auth_code.json()
 
+        if user.email in reference_codes:
+            reference =customer_codes[user.email]
+        else:
+            # Generate a unique reference code
+            reference = str(uuid.uuid4())
+            customer_codes[user.email] = reference
+    return auth_code.json()
