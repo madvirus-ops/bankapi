@@ -277,7 +277,7 @@ async def create_monify_account(request:schemas.Bvnreq,user:dict =Depends(get_cu
        accountName=f"{user.first_name} {user.last_name}", 
        customerEmail=user.email, 
        customerName=f"{user.first_name} {user.last_name}", 
-       customerBvn="22460922681",#request.bvn,
+       customerBvn=request.bvn,
        availableBank=True
        )
     data.append(reserve_account)
