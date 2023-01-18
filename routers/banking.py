@@ -236,7 +236,8 @@ async def create_kuda_virtual_account(user:dict =Depends(get_current_user),db:Se
     auth_code = requests.post(auth_url,json=auth_data)
     if auth_code.status_code == 200:
         token = auth_code.text
-    raise HTTPException(status_code=auth_code.status_code,detail=f"{auth_code.text} " if auth_code.text else None)
+        return token
+    raise HTTPException(status_code=auth_code.status_code,detail="something went wrong")
 
 
 
