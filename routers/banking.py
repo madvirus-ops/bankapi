@@ -8,6 +8,7 @@ from utils import get_current_user
 import schemas
 import uuid
 import os
+import json
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -226,25 +227,17 @@ customer_codes = {}
 
 @router.post("/kuda/virtual-account",status_code=status.HTTP_201_CREATED)
 async def create_kuda_virtual_account(user:dict =Depends(get_current_user),db:Session = Depends(get_db)):
+    #authentication
     auth_url = 'https://kuda-openapi-uat.kudabank.com/v2.1/Account/GetToken'
-
     auth_data = {
         "email": kd_email,
         "apiKey": kd_secret_key
     }
-
-
     auth_code = requests.post(auth_url,json=auth_data)
     if auth_code.status_code == 200:
-        return auth_code.text
-
-        if user.email in reference_codes:
-            reference =customer_codes[user.email]
-        else:
-            # Generate a unique reference code
-            reference = str(uuid.uuid4())
-            customer_codes[user.email] = reference
-    return auth_code.text
+        token = auth_code.text
+        return token
+    raise HTTPException(status_code=auth_code.status_code,detail="something went wrong")
 
 
 
@@ -281,32 +274,43 @@ async def create_monify_account(request:schemas.Bvnreq,user:dict =Depends(get_cu
        availableBank=True
        )
     data.append(reserve_account)
-    accounts = []
-    accounts.append(data[0]["responseBody"]["accounts"])
+    # accounts = []
+    accounts = data[0]["responseBody"]["accounts"]
     # accounts.append(data[0]["responseBody"]["accountReference"])
-
+    # return accounts
     for key in accounts:
-        try:
-            add_account = models.UserReservedAccount(
+        add_account = models.UserReservedAccount(
                 user_id = user.id,
-                bank_code = key[0]["bankCode"],
-                bank_name= key[0]["bankName"],
-                AccountName = key[0]["accountName"],
-                AccountNumber = key[0]["accountNumber"],
+                bank_code = key["bankCode"],
+                bank_name= key["bankName"],
+                AccountName = key["accountName"],
+                AccountNumber = key["accountNumber"],
 
             )
-            db.add(add_account)
-            db.commit()
-            db.refresh(add_account)
-        except Exception as e:
-            print(e)
-    # acct_ref = models.AccountRef(user_id = user.id,accountReference= data[0]["responseBody"]["accountReference"])
-    # db.add(acct_ref)
-    # db.commit()
-    # db.refresh(acct_ref)
+        db.add(add_account)
+        db.commit()
+    acct_ref = models.AccountRef(user_id = user.id,accountReference= data[0]["responseBody"]["accountReference"])
+    db.add(acct_ref)
+    db.commit()
+    db.refresh(acct_ref)
 
     
-    return {"reference":accounts,"accounts":add_account}
+    return {"reference":acct_ref,"accounts":accounts}
 
     print(reserve_account)
  
+@router.get("/account/ref")
+def acct(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
+    accounts = db.query(models.UserReservedAccount).filter(models.UserReservedAccount.user_id == user.id).all()
+    ref = db.query(models.AccountRef).filter(models.AccountRef.user_id == user.id).all()
+    return {"reference":ref,"accounts":accounts}
+
+
+@router.get("/account/balance",summary="get the user account balance")
+async def check_balance(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
+    balance = db.query(models.UserAccountBalance).filter(models.UserAccountBalance.user_id == user.id).first()
+    return {
+        "user_email":user.email,
+        "balance": f"₦{balance.amount}",
+        "broke?":"Not yet"
+    }
