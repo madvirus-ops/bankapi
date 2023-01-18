@@ -8,6 +8,7 @@ from utils import get_current_user
 import schemas
 import uuid
 import os
+import json
 from dotenv import load_dotenv
 load_dotenv()
 
@@ -281,32 +282,33 @@ async def create_monify_account(request:schemas.Bvnreq,user:dict =Depends(get_cu
        availableBank=True
        )
     data.append(reserve_account)
-    accounts = []
-    accounts.append(data[0]["responseBody"]["accounts"])
+    # accounts = []
+    accounts = data[0]["responseBody"]["accounts"]
     # accounts.append(data[0]["responseBody"]["accountReference"])
-
+    # return accounts
     for key in accounts:
-        try:
-            add_account = models.UserReservedAccount(
+        add_account = models.UserReservedAccount(
                 user_id = user.id,
-                bank_code = key[0]["bankCode"],
-                bank_name= key[0]["bankName"],
-                AccountName = key[0]["accountName"],
-                AccountNumber = key[0]["accountNumber"],
+                bank_code = key["bankCode"],
+                bank_name= key["bankName"],
+                AccountName = key["accountName"],
+                AccountNumber = key["accountNumber"],
 
             )
-            db.add(add_account)
-            db.commit()
-            db.refresh(add_account)
-        except Exception as e:
-            print(e)
-    # acct_ref = models.AccountRef(user_id = user.id,accountReference= data[0]["responseBody"]["accountReference"])
-    # db.add(acct_ref)
-    # db.commit()
-    # db.refresh(acct_ref)
+        db.add(add_account)
+        db.commit()
+    acct_ref = models.AccountRef(user_id = user.id,accountReference= data[0]["responseBody"]["accountReference"])
+    db.add(acct_ref)
+    db.commit()
+    db.refresh(acct_ref)
 
     
-    return {"reference":accounts,"accounts":add_account}
+    return {"reference":acct_ref,"accounts":accounts}
 
     print(reserve_account)
  
+@router.get("/account/ref")
+def acct(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
+    accounts = db.query(models.UserReservedAccount).filter(models.UserReservedAccount.user_id == user.id).all()
+    ref = db.query(models.AccountRef).filter(models.AccountRef.user_id == user.id).all()
+    return {"reference":ref,"accounts":accounts}

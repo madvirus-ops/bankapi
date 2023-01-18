@@ -59,6 +59,13 @@ class UserReservedAccount(Base):
     AccountName = Column(String)
 
 
+class UserAccountBalance(Base):
+    __tablename__ = "account_balance"
+    id = Column(Integer,primary_key=True,index=True)
+    user_id = Column(Integer,ForeignKey('Users.id'))
+
+
+
 
 
 
