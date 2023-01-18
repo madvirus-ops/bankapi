@@ -304,3 +304,13 @@ def acct(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
     accounts = db.query(models.UserReservedAccount).filter(models.UserReservedAccount.user_id == user.id).all()
     ref = db.query(models.AccountRef).filter(models.AccountRef.user_id == user.id).all()
     return {"reference":ref,"accounts":accounts}
+
+
+@router.get("/account/balance",summary="get the user account balance")
+async def check_balance(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
+    balance = db.query(models.UserAccountBalance).filter(models.UserAccountBalance.user_id == user.id).first()
+    return {
+        "user_email":user.email,
+        "balance": f"₦{balance.amount}",
+        "broke?":"Not yet"
+    }
