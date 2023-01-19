@@ -299,7 +299,7 @@ async def create_monify_account(request:schemas.Bvnreq,user:dict =Depends(get_cu
 
     print(reserve_account)
  
-@router.get("/account/ref")
+@router.get("/user/reserveAccounts", summary="get the account associated with this user", status_code=status.HTTP_200_OK)
 def acct(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
     accounts = db.query(models.UserReservedAccount).filter(models.UserReservedAccount.user_id == user.id).all()
     ref = db.query(models.AccountRef).filter(models.AccountRef.user_id == user.id).all()
@@ -309,6 +309,8 @@ def acct(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
 @router.get("/account/balance",summary="get the user account balance")
 async def check_balance(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
     balance = db.query(models.UserAccountBalance).filter(models.UserAccountBalance.user_id == user.id).first()
+    if not balance:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="no account balance associated with user")
     return {
         "user_email":user.email,
         "balance": f"₦{balance.amount}",
