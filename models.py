@@ -18,19 +18,22 @@ class UserModel(Base):
     __tablename__ = 'Users'
 
     id = Column(Integer,primary_key=True,index=True)
+    username = Column(String)
     first_name = Column(String)
     last_name = Column(String)
     email = Column(String,unique=True)
     phoneNumber = Column(String)
     password = Column(String) 
 
-    pin = relationship("UserPin",back_popukates="user")
-    balance  = relationship("UserAccountBalance",back_popukates="user")
+    pin = relationship("UserPin",back_populates="user")
+    balance  = relationship("UserAccountBalance",back_populates="user")
     blogs = relationship("BlogModel",back_populates="owner")
-    accounts = relationship("UserReservedAccounts", back_populates = "user")
+    accounts = relationship("UserReservedAccount", back_populates = "user")
+
 
 
 class UserPin(Base):
+    __tablename__ = "userpin"
     id = Column(Integer,primary_key=True,index=True)
     user_id = Column(Integer,ForeignKey('Users.id'))
     pin = Column(Integer)
