@@ -30,6 +30,17 @@ async def update_user(id:int,request:schemas.UserUpdate,db:Session = Depends(get
     return UserCrud.update(id,db,request)
 
 
+@router.post("/set-pin")
+async def set_current_pin(request:schemas.SetPin, db:Session = Depends(get_db),user:dict = Depends(get_current_user)):
+    if request:
+        if request.pin1 == request.pin2:
+            set_pin = models.UserPin(user_id = user.id, pin = request.pin2)
+            db.add(set_pin)
+            db.commit()
+            return {"pin set successfully"}
+        return {"pins do not match"}
+    return {"something went wrong"}
+
 # @router.post("/kuda-token")
 # async def get_user_token(request:schemas.KudaKey):
 #     dataa = {}

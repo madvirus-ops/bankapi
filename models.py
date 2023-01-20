@@ -18,13 +18,28 @@ class UserModel(Base):
     __tablename__ = 'Users'
 
     id = Column(Integer,primary_key=True,index=True)
+    username = Column(String)
     first_name = Column(String)
     last_name = Column(String)
     email = Column(String,unique=True)
     phoneNumber = Column(String)
     password = Column(String) 
 
+    pin = relationship("UserPin",back_populates="user")
+    balance  = relationship("UserAccountBalance",back_populates="user")
     blogs = relationship("BlogModel",back_populates="owner")
+    accounts = relationship("UserReservedAccount", back_populates = "user")
+
+
+
+class UserPin(Base):
+    __tablename__ = "userpin"
+    id = Column(Integer,primary_key=True,index=True)
+    user_id = Column(Integer,ForeignKey('Users.id'))
+    pin = Column(Integer)
+    user = relationship("UserModel",back_populates= "pin")
+
+
 
 
 class Banks(Base):
@@ -57,6 +72,7 @@ class UserReservedAccount(Base):
     bank_name = Column(String)
     AccountNumber = Column(String)
     AccountName = Column(String)
+    user = relationship("UserModel",back_populates= "accounts")
 
 
 class UserAccountBalance(Base):
@@ -64,6 +80,7 @@ class UserAccountBalance(Base):
     id = Column(Integer,primary_key=True,index=True)
     user_id = Column(Integer,ForeignKey('Users.id'))
     amount = Column(Integer, default = 0)
+    user = relationship("UserModel",back_populates= "balance")
 
 
 

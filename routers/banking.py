@@ -5,6 +5,7 @@ from database import get_db
 from sqlalchemy.orm import Session
 import base64
 from utils import get_current_user
+from worker import transfer_to_wallet
 import schemas
 import uuid
 import os
@@ -299,7 +300,7 @@ async def create_monify_account(request:schemas.Bvnreq,user:dict =Depends(get_cu
 
     print(reserve_account)
  
-@router.get("/account/ref")
+@router.get("/user/reserveAccounts", summary="get the account associated with this user", status_code=status.HTTP_200_OK)
 def acct(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
     accounts = db.query(models.UserReservedAccount).filter(models.UserReservedAccount.user_id == user.id).all()
     ref = db.query(models.AccountRef).filter(models.AccountRef.user_id == user.id).all()
@@ -309,8 +310,22 @@ def acct(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
 @router.get("/account/balance",summary="get the user account balance")
 async def check_balance(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
     balance = db.query(models.UserAccountBalance).filter(models.UserAccountBalance.user_id == user.id).first()
+    if not balance:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="no account balance associated with user")
     return {
         "user_email":user.email,
         "balance": f"₦{balance.amount}",
         "broke?":"Not yet"
     }
+
+
+
+@router.post("/internal/transfer")
+async def internal_wallet_transfer(request:schemas.InternalTransfer,user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
+    if request:
+        response = transfer_to_wallet(db=db,toUser=request.toUser,User=user.id,Amount=request.Amount,pin=request.pin)
+        return response
+
+    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="something went wrong shithead...")
+
+

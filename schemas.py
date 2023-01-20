@@ -9,6 +9,7 @@ class Posts(BaseModel):
     
 
 class User(BaseModel):
+    username:str
     first_name:str
     last_name:str
     email:str
@@ -83,3 +84,13 @@ class KudaKey(BaseModel):
 
 class Bvnreq(BaseModel):
     bvn:str
+
+
+class InternalTransfer(BaseModel):
+    toUser:str
+    Amount: int
+    pin: int
+
+class SetPin(BaseModel):
+    pin1:int
+    pin2:int

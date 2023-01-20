@@ -3,7 +3,7 @@ from routers import post,users,authentication,banking,webhook
 import models
 from database import engine
 
-app = FastAPI(title="Banke App",description="mimicking the backend of basic fintech app")
+app = FastAPI(title="Meli Api",description="mimicking the backend of basic fintech app")
 
 
 
