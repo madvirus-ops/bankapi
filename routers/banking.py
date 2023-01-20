@@ -316,3 +316,7 @@ async def check_balance(user:dict = Depends(get_current_user),db:Session = Depen
         "balance": f"₦{balance.amount}",
         "broke?":"Not yet"
     }
+
+
+
+@router.post("/internal/transfer")
