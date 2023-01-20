@@ -40,6 +40,8 @@ class UserPin(Base):
     user = relationship("UserModel",back_populates= "pin")
 
 
+
+
 class Banks(Base):
     __tablename__ = 'banks'
     id = Column(Integer,primary_key=True,index=True)
