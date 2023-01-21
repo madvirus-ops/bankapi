@@ -38,8 +38,10 @@ async def create_user(request:schemas.User,db:Session=Depends(get_db)):
 
 @router.post('/verify-email/')
 def verify_email(token:schemas.VerifyEmail, db:Session=Depends(get_db)):
-    verify_email_code(token.token, db)
-    return {'message': 'email sucessfuly verified'}
+    verified = verify_email_code(token=token.token, db=db)
+    if not verified:
+        raise HTTPException(status_code=100, detail="not verified")
+    return token.token
 
 
 
@@ -69,7 +71,7 @@ async def log_user_in(response:Response,request:OAuth2PasswordRequestForm = Depe
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Credentials")
     if not verify_password(request.password,user.password):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Password")
-    if user.email_verified == False:
+    if user.email_verifies == False:
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail="email not verified, verification email sent again!!!!")
     access_token = create_access_token(data={"sub":user.email})
 

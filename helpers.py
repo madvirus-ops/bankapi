@@ -34,7 +34,7 @@ def get_user_by_email(email,db:Session):
     return user
 
 
-def get_user_by_id(id:str,db:Session):
+def get_user_by_id(id:int,db:Session):
     user = db.query(models.UserModel).filter(models.UserModel.id == id).first()
     return user
    
