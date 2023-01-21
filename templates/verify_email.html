@@ -62,7 +62,7 @@ Welcome to Melidata
       justify-content: center;
     ">
  
-<a href="https://loveme.hng.tech/verify-email?tkn={{ token }}"><button type="button" style="
+<a href="http://127.0.0.1:8000/api/v1/auth/verify-email/?tkn={{ token }}"><button type="button" style="
         background: #d2120f;
         border: 1px solid #d2120f;
         border-radius: 8px;
@@ -71,6 +71,14 @@ Welcome to Melidata
         font-size: 18px;
         line-height: 10px;
       ">Verify email</button></a>
+    </section>
+    <p style="font-size: 18px;
+      line-height: 16px;
+      color: #374957;">or</p>
+      <p style="font-size: 18px;
+      line-height: 16px;
+      color: #374957;">{{token}}</p>
+    </section>
     </section>
   </main>
   <footer style="width: 100%; padding: 0.5em; position: absolute;

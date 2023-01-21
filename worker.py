@@ -4,12 +4,30 @@ import json
 from fastapi import Depends,status,HTTPException
 import models
 from datetime import datetime,timedelta,timezone
+import os
+from dotenv import load_dotenv
+load_dotenv()
 from jose import jwt,JWTError
 from helpers import get_user_by_id
-
+from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 
 SECRET_KEY='secret'
 ALGORITHM='HS256'
+
+
+env_config = ConnectionConfig(
+    MAIL_USERNAME = os.getenv("SEND_EMAIL"),
+    MAIL_PASSWORD = os.getenv("SEND_EMAIL_PASSWORD"),
+    MAIL_FROM = os.getenv("SEND_EMAIL"),
+    MAIL_PORT = 587,
+    MAIL_SERVER='smtp.gmail.com',
+    MAIL_FROM_NAME="Melidata",
+    MAIL_STARTTLS = True,
+    MAIL_SSL_TLS = False,
+    USE_CREDENTIALS = True,
+    VALIDATE_CERTS = True,
+    TEMPLATE_FOLDER='templates'
+)
 
 def transfer_to_wallet(db:Session,toUser,User,Amount,pin):
     
@@ -46,7 +64,7 @@ def transfer_to_wallet(db:Session,toUser,User,Amount,pin):
 
 
 def verification_code(user_id):
-    data={'sub':user_id, 'type':'verify_email_code', 'exp':datetime.now(tz=timezone.utc)+timedelta(minutes=5)}
+    data={'sub':user_id, 'type':'verify_email_code', 'exp':datetime.now(tz=timezone.utc)+timedelta(minutes=15)}
     encoded=jwt.encode(data,SECRET_KEY, algorithm=ALGORITHM )
     return encoded
 
@@ -54,7 +72,7 @@ def verify_email_code(token, db:Session):
     exception= HTTPException(status_code=400,  detail='invalid token or token has expired')
     try:
         payload=jwt.decode(token, SECRET_KEY)
-        user=get_user_by_id(db, payload.get('sub'))
+        user=get_user_by_id(db=db, id=payload.get('sub'))
         if payload.get('type') != 'verify_email_code':
             raise exception
         elif not user:
