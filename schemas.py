@@ -65,7 +65,8 @@ class ValidateAccount(BaseModel):
     account_number:int
 
 
-
+class VerifyEmail(BaseModel):
+    token : str
 
 
 

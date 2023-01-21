@@ -1,9 +1,11 @@
-from fastapi import APIRouter,status,HTTPException,Depends,Response,Cookie,Header
+from fastapi import APIRouter,status,HTTPException,Depends,Response,Cookie,Header,BackgroundTasks
 from sqlalchemy.orm import Session
 from database import get_db
 from helpers import get_user_by_email,verify_password
 import schemas
+from fastapi_mail import FastMail,MessageSchema
 from fastapi.security import OAuth2PasswordRequestForm
+from worker import verification_code,env_config,verify_email_code
 
 from utils import create_access_token,SECRET_KEY,access_cookies_time,ACCESS_TOKEN_LIFETIME_MINUTES,ALGORITHM,refresh_cookies_time,REFRESH_TOKEN_LIFETIME
 from fastapi_jwt_auth import AuthJWT
@@ -23,7 +25,40 @@ async def create_user(request:schemas.User,db:Session=Depends(get_db)):
     if verify:
         raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,detail="user with email exists")
     new_user = UserCrud.create_user(request,db)
-    return new_user
+    token = verification_code(user_id=new_user.id)
+    message = MessageSchema(
+        subject="Account Verification Email",
+        recipients=[new_user.email], 
+        template_body={'token':token, 'user':f'{new_user.username}',},
+        subtype='html',
+        )
+    fm = FastMail(env_config)
+    await fm.send_message(message, template_name="verify_email.html")
+    return {"message":"email verificatin sent","user":new_user}
+
+@router.post('/verify-email/')
+def verify_email(token:schemas.VerifyEmail, db:Session=Depends(get_db)):
+    verify_email_code(token.token, db)
+    return {'message': 'email sucessfuly verified'}
+
+
+
+@router.post('/resend-email/')
+def resend_email_verification_code(task:BackgroundTasks,email:str, db:Session=Depends(get_db)):
+    try:
+        User=get_user_by_email(email=email, db=db)
+        token=verification_code(User.id)
+        message=MessageSchema(
+            subject='Please confirm your email address',
+            recipients=[User.email],
+            template_body={'token':token, 'user':f'{User.username}'},
+            subtype='html'
+        )
+        f=FastMail(env_config)
+        task.add_task(f.send_message, message, template_name='verify_email.html')
+        return {'message':'verification code sent'}
+    except:
+        raise HTTPException(detail='user with this email does not exists', status_code=400)
 
 
 
@@ -34,6 +69,8 @@ async def log_user_in(response:Response,request:OAuth2PasswordRequestForm = Depe
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Credentials")
     if not verify_password(request.password,user.password):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Password")
+    if user.email_verified == False:
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail="email not verified, verification email sent again!!!!")
     access_token = create_access_token(data={"sub":user.email})
 
     

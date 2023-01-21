@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Melidata - Verify Email </title>
+</head>
+<body style="width: 100%; font-family: 'Avenir', sans-serif; color: #374957;
+padding: 0px;">
+  <style>
+    body, ul, div, section, p, header, main {
+      width: 100%;
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    body {
+      height: 100vh;
+    }
+    @media (min-width: 768px) {
+      header {
+        padding: 50px;
+      }
+
+      main {
+        padding: 10px 50px;
+      }
+  }
+  </style>
+  <header class="container" style="padding: 20px 20px;">
+    <!-- <img src="https://api.loveme.hng.tech/static/logo-header.jpg" alt="" srcset=""> -->
+    <p style="font-size: 14px; line-height: 140%; text-align: center;"><span style="font-family: 'Cinzel Decorative'; font-size: 14px; line-height: 19.6px;"><strong>Welcome to Melidata</strong></span></p>
+  </header>
+  <main style="width: 100%; padding: 2em;
+  align-items: center;
+  justify-content: center;">
+    <!-- <section class="title" style="margin: 20px 0;
+    text-align: center; border-top: 2px solid #cecece; border-bottom: 2px solid #cecece;">
+      <h1 style="
+          font-weight: 200;
+          font-size: 24px;
+          line-height: 27px;
+          font-style: italic;
+      ">Love letter from {{user}}</h1>
+    </section> -->
+    <section style="
+      margin: 2em 1em;
+      align-items: center;
+      justify-content: center;
+    ">
+    <h1>Hello {{ user }},</h1><br>
+
+Welcome to Melidata
+      </p>
+      <p style="font-size: 18px;
+      line-height: 16px;
+      color: #374957;">Please click the button below to verify your email address</p>
+    </section>
+           <section class="btn-container" style="display: flex;
+      align-items: center;
+      justify-content: center;
+    ">
+ 
+<a href="http://127.0.0.1:8000/api/v1/auth/verify-email/?tkn={{ token }}"><button type="button" style="
+        background: #d2120f;
+        border: 1px solid #d2120f;
+        border-radius: 8px;
+        padding: 16px 28px;
+        color: #fff;
+        font-size: 18px;
+        line-height: 10px;
+      ">Verify email</button></a>
+    </section>
+    <p style="font-size: 18px;
+      line-height: 16px;
+      color: #374957;">or</p>
+      <p style="font-size: 18px;
+      line-height: 16px;
+      color: #374957;">{{token}}</p>
+    </section>
+    </section>
+  </main>
+  <footer style="width: 100%; padding: 0.5em; position: absolute;
+  bottom: 0; display: flex;
+  gap: 0.5em; flex-direction: column; align-items: center; justify-content: center; align-items: center;">
+  
+    <div>
+      <p style="font-size: 12px;
+      line-height: 12px;
+      padding: 0 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #858B8F;">Copyright © 2023. All rights reserved. <br/> Melidata Inc..</p>
+    </div>
+  </footer>
+</body>
+
+</html>

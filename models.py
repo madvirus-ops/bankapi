@@ -1,5 +1,5 @@
 from database import Base
-from sqlalchemy import Column,String,Integer,ForeignKey
+from sqlalchemy import Column,String,Integer,ForeignKey,Boolean
 from sqlalchemy.orm import relationship
 
 
@@ -18,12 +18,13 @@ class UserModel(Base):
     __tablename__ = 'Users'
 
     id = Column(Integer,primary_key=True,index=True)
-    username = Column(String)
+    username = Column(String,unique=True)
     first_name = Column(String)
     last_name = Column(String)
     email = Column(String,unique=True)
     phoneNumber = Column(String)
-    password = Column(String) 
+    password = Column(String)
+    email_verifies = Column(Boolean,default = False)
 
     pin = relationship("UserPin",back_populates="user")
     balance  = relationship("UserAccountBalance",back_populates="user")
