@@ -307,7 +307,7 @@ def acct(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
     return {"reference":ref,"accounts":accounts}
 
 
-@router.get("/account/balance",summary="get the user account balance")
+@router.get("/account/balance",summary="get the user account balance", status_code=status.HTTP_200_OK)
 async def check_balance(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
     balance = db.query(models.UserAccountBalance).filter(models.UserAccountBalance.user_id == user.id).first()
     if not balance:
@@ -320,7 +320,7 @@ async def check_balance(user:dict = Depends(get_current_user),db:Session = Depen
 
 
 
-@router.post("/internal/transfer")
+@router.post("/internal/transfer",status_code=status.HTTP_202_ACCEPTED)
 async def internal_wallet_transfer(request:schemas.InternalTransfer,user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
     if request:
         response = transfer_to_wallet(db=db,toUser=request.toUser,User=user.id,Amount=request.Amount,pin=request.pin)
