@@ -68,7 +68,8 @@ def verification_code(user_id):
     encoded=jwt.encode(data,SECRET_KEY, algorithm=ALGORITHM)
     return encoded
 
-def verify_email_code(token, db:Session):
+
+async def verify_email(token, db:Session):
     exception= HTTPException(status_code=400,  detail='invalid token or token has expired')
     userexception= HTTPException(status_code=400,  detail='no user')
     try:
@@ -80,9 +81,45 @@ def verify_email_code(token, db:Session):
             raise userexception       
     except Exception as e:
         return e
-    user.email_verifies =True
+    user.email_verifies = True
     try:
         db.commit()
+        db.refresh(user)
     except Exception as e:
         raise e
-    return {"user verified"}
+    return True
+
+
+def Otp_token(email):
+    data = {
+        "email":email,
+        "type":"email_verification"
+    }
+    token = jwt.encode(data,SECRET_KEY,algorithm=ALGORITHM)
+    return token 
+
+
+async def verify_token(token : str,db:Session):
+    exception= HTTPException(status_code=400,  detail='invalid token or token has expired')
+    userexception= HTTPException(status_code=400,  detail='no user')
+    # try:    
+    #     verify = jwt.decode(token,SECRET_KEY,algorithms=ALGORITHM)
+    #     return verify
+    # except Exception as e:
+    #     raise e
+    try:
+        payload=jwt.decode(token, SECRET_KEY)
+        user=db.query(models.UserModel).filter(models.UserModel.id == payload.get('sub')).first()
+        if payload.get('type') != 'verify_email_code':
+            raise exception
+        elif not user:
+            raise userexception       
+    except Exception as e:
+        return e
+    # user.email_verifies = True
+    # try:
+    #     db.commit()
+    #     db.refresh(user)
+    # except Exception as e:
+    #     raise e
+    return user
