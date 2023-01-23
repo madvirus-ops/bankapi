@@ -27,7 +27,7 @@ async def create_user(request:schemas.User,db:Session=Depends(get_db)):
     if verify:
         raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,detail="user with email exists")
     new_user = UserCrud.create_user(request,db)
-    token = verification_code(new_user.id)
+    token = verification_code(new_user.email)
     message = MessageSchema(
         subject="Account Verification Email",
         recipients=[new_user.email], 
@@ -36,7 +36,7 @@ async def create_user(request:schemas.User,db:Session=Depends(get_db)):
         )
     fm = FastMail(env_config)
     await fm.send_message(message, template_name="verify_email.html")
-    return {"message":"email verificatin sent","user":new_user}
+    return {"message":"email verification sent","user":new_user}
 
 
 
@@ -51,10 +51,9 @@ def resend_email_verification_code(task:BackgroundTasks,email:str, db:Session=De
         User=get_user_by_email(email=email, db=db)
         # if User.email_verifies:
         #     raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,detail="your email is verified")
-        token=verification_code(User.email)
-        return token 
+        token=verification_code(User.email) 
         message=MessageSchema(
-            subject='Please confirm your email address',
+            subject='Account Verification Email',
             recipients=[User.email],
             template_body={'token':token, 'user':f'{User.username}'},
             subtype='html'
