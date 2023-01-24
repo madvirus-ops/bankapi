@@ -63,31 +63,29 @@ def transfer_to_wallet(db:Session,toUser,User,Amount,pin):
     }
 
 
-def verification_code(user_id):
-    data={'sub':user_id, 'type':'verify_email_code', 'exp':datetime.now(tz=timezone.utc)+timedelta(minutes=15)}
+def verification_code(email):
+    data={'sub':email, 'type':'verify_email_code', 'exp':datetime.now(tz=timezone.utc)+timedelta(minutes=15)}
     encoded=jwt.encode(data,SECRET_KEY, algorithm=ALGORITHM)
     return encoded
 
 
-async def verify_email(token, db:Session):
+def verification_email(token, db:Session):
     exception= HTTPException(status_code=400,  detail='invalid token or token has expired')
     userexception= HTTPException(status_code=400,  detail='no user')
     try:
-        payload=jwt.decode(token, SECRET_KEY)
-        user=db.query(models.UserModel).filter(models.UserModel.id == payload.get('sub')).first()
+        payload = jwt.decode(token,'secret',algorithms='HS256')
+        user = db.query(models.UserModel).filter(models.UserModel.email == payload.get('sub')).first()
         if payload.get('type') != 'verify_email_code':
             raise exception
         elif not user:
-            raise userexception       
-    except Exception as e:
-        return e
-    user.email_verifies = True
-    try:
+            raise userexception 
+        user.email_verifies = True
         db.commit()
-        db.refresh(user)
+        return {"payload":payload,"user":user}
     except Exception as e:
-        raise e
-    return True
+        raise HTTPException(status_code=status.HTTP_502_BAD_GATEWAY,detail=e)
+    
+    
 
 
 def Otp_token(email):
@@ -107,19 +105,19 @@ async def verify_token(token : str,db:Session):
     #     return verify
     # except Exception as e:
     #     raise e
-    try:
-        payload=jwt.decode(token, SECRET_KEY)
-        user=db.query(models.UserModel).filter(models.UserModel.id == payload.get('sub')).first()
-        if payload.get('type') != 'verify_email_code':
-            raise exception
-        elif not user:
-            raise userexception       
-    except Exception as e:
-        return e
+    # try:
+    #     payload=jwt.decode(token, SECRET_KEY)
+    #     user=db.query(models.UserModel).filter(models.UserModel.id == payload.get('sub')).first()
+    #     if payload.get('type') != 'verify_email_code':
+    #         raise exception
+    #     elif not user:
+    #         raise userexception       
+    # except Exception as e:
+    #     return e
     # user.email_verifies = True
     # try:
     #     db.commit()
     #     db.refresh(user)
     # except Exception as e:
     #     raise e
-    return user
+    # return user

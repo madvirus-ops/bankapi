@@ -7,7 +7,7 @@ from helpers import get_user_by_email,verify_password
 import schemas
 from fastapi_mail import FastMail,MessageSchema
 from fastapi.security import OAuth2PasswordRequestForm
-from worker import verification_code,verify_email,env_config,verify_token
+from worker import verification_code,verification_email,env_config,verify_token
 
 from utils import create_access_token,SECRET_KEY,access_cookies_time,ACCESS_TOKEN_LIFETIME_MINUTES,ALGORITHM,refresh_cookies_time,REFRESH_TOKEN_LIFETIME
 from fastapi_jwt_auth import AuthJWT
@@ -27,7 +27,7 @@ async def create_user(request:schemas.User,db:Session=Depends(get_db)):
     if verify:
         raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,detail="user with email exists")
     new_user = UserCrud.create_user(request,db)
-    token = verification_code(new_user.id)
+    token = verification_code(new_user.email)
     message = MessageSchema(
         subject="Account Verification Email",
         recipients=[new_user.email], 
@@ -36,7 +36,7 @@ async def create_user(request:schemas.User,db:Session=Depends(get_db)):
         )
     fm = FastMail(env_config)
     await fm.send_message(message, template_name="verify_email.html")
-    return {"message":"email verificatin sent","user":new_user}
+    return {"message":"email verification sent","user":new_user}
 
 
 
@@ -49,9 +49,11 @@ async def create_user(request:schemas.User,db:Session=Depends(get_db)):
 def resend_email_verification_code(task:BackgroundTasks,email:str, db:Session=Depends(get_db)):
     try:
         User=get_user_by_email(email=email, db=db)
-        token=verification_code(User.id)
+        # if User.email_verifies:
+        #     raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,detail="your email is verified")
+        token=verification_code(User.email) 
         message=MessageSchema(
-            subject='Please confirm your email address',
+            subject='Account Verification Email',
             recipients=[User.email],
             template_body={'token':token, 'user':f'{User.username}'},
             subtype='html'
@@ -67,6 +69,8 @@ def resend_email_verification_code(task:BackgroundTasks,email:str, db:Session=De
 @router.post("/login")
 async def log_user_in(response:Response,request:OAuth2PasswordRequestForm = Depends(),db:Session = Depends(get_db)):
     user = get_user_by_email(request.username,db)
+    # user.email_verifies = False
+    # db.commit()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Credentials")
     if not verify_password(request.password,user.password):
@@ -124,16 +128,11 @@ def refresh_token(response:Response,Authorization:AuthJWT=Depends(), refresh_tok
 
 
 
-@router.get('/verify-email/{token}')
-async def verify_email_code(token:str, db:Session=Depends(get_db)):
-    try:
-        payload=jwt.decode(token, SECRET_KEY)
-        id = payload.get('id')
-        user=db.query(models.UserModel).filter(models.UserModel.id ==id).first()
-        if payload.get('type') != 'verify_email_code':
-            return "shit"
-        elif not user:
-            return "no user"       
-    except Exception as e:
-        return e
-    return user
+@router.get('/verify-email/')
+async def verify_email_code(key:str, db:Session=Depends(get_db)):
+    tok = key
+    dd = verification_email(token=tok,db=db)
+    if not dd:
+        return "something failed"
+
+    return {"email verified"}
