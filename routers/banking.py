@@ -1,5 +1,5 @@
 import requests
-from fastapi import APIRouter,status,Depends,HTTPException
+from fastapi import APIRouter,status,Depends,HTTPException,BackgroundTasks
 import models
 from database import get_db
 from sqlalchemy.orm import Session
@@ -321,11 +321,9 @@ async def check_balance(user:dict = Depends(get_current_user),db:Session = Depen
 
 
 @router.post("/internal/transfer",status_code=status.HTTP_202_ACCEPTED)
-async def internal_wallet_transfer(request:schemas.InternalTransfer,user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
+async def internal_wallet_transfer(request:schemas.InternalTransfer,task:BackgroundTasks,user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
     if request:
-        response = transfer_to_wallet(db=db,toUser=request.toUser,User=user.id,Amount=request.Amount,pin=request.pin)
-        if not response:
-            print("shit")
+        response = transfer_to_wallet(db=db,toUser=request.toUser,User=user.id,Amount=request.Amount,pin=request.pin,task=task)
         return response
 
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="something went wrong shithead...")
