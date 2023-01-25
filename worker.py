@@ -39,6 +39,8 @@ def transfer_to_wallet(db:Session,toUser,User,Amount,pin,task:BackgroundTasks):
     from_user = db.query(models.UserModel).filter(models.UserModel.id == User).first()
     from_user_wallet = db.query(models.UserAccountBalance).filter(models.UserAccountBalance.user_id == from_user.id).first()
     from_pinn = db.query(models.UserPin).filter(models.UserPin.user_id == from_user.id).first()
+    if not from_pinn:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Set your pin to continue")
     if not to_user_wallet:
         new = models.UserAccountBalance(user_id = to_user.id, amount = 0)
         db.add(new)
