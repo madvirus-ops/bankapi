@@ -1,4 +1,4 @@
-from pydantic import BaseModel
+from pydantic import BaseModel,EmailStr
 from typing import List
 from fastapi_jwt_auth import AuthJWT
 from typing import Optional
@@ -12,15 +12,15 @@ class User(BaseModel):
     username:str
     first_name:str
     last_name:str
-    email:str
+    email:EmailStr
     phoneNumber:str
     password1:str
     password2:str
 
 
 class ShowUser(BaseModel):
-    name: str
-    email:str
+    username: str
+    email:EmailStr
     blogs:List
 
     class Config():
@@ -28,7 +28,8 @@ class ShowUser(BaseModel):
 
 class UserUpdate(BaseModel):
     name:str
-    email:str
+    email:EmailStr
+    username:str
 
 
 class Login(BaseModel):

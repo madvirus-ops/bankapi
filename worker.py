@@ -1,7 +1,7 @@
 from database import get_db
 from sqlalchemy.orm import Session
 import json
-from fastapi import Depends,status,HTTPException
+from fastapi import Depends,status,HTTPException,BackgroundTasks
 import models
 from datetime import datetime,timedelta,timezone
 import os
@@ -29,14 +29,18 @@ env_config = ConnectionConfig(
     TEMPLATE_FOLDER='templates'
 )
 
-def transfer_to_wallet(db:Session,toUser,User,Amount,pin):
+def transfer_to_wallet(db:Session,toUser,User,Amount,pin,task:BackgroundTasks):
     
     to_user = db.query(models.UserModel).filter(models.UserModel.username == toUser).first()
+    if not to_user:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"user with name: {toUser} not found")
     to_user_wallet = db.query(models.UserAccountBalance).filter(models.UserAccountBalance.user_id == to_user.id).first()
 
     from_user = db.query(models.UserModel).filter(models.UserModel.id == User).first()
     from_user_wallet = db.query(models.UserAccountBalance).filter(models.UserAccountBalance.user_id == from_user.id).first()
     from_pinn = db.query(models.UserPin).filter(models.UserPin.user_id == from_user.id).first()
+    if not from_pinn:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"Set your pin to continue")
     if not to_user_wallet:
         new = models.UserAccountBalance(user_id = to_user.id, amount = 0)
         db.add(new)
@@ -48,8 +52,30 @@ def transfer_to_wallet(db:Session,toUser,User,Amount,pin):
             to_user_wallet.amount = to_user_wallet.amount + Amount
             from_user_wallet.amount = from_user_wallet.amount - Amount 
             db.commit()
+
+            sender_message = MessageSchema(
+            subject='Transaction Alert',
+            recipients=[from_user.email],
+            template_body={'amount':Amount, 'user':f'{from_user.username}','receiver':to_user.username,'balance':from_user_wallet.amount},
+            subtype='html')
+
+            receiver_message = MessageSchema(
+            subject='Transaction Alert',
+            recipients=[to_user.email],
+            template_body={'amount':Amount, 'user':f'{to_user.username}','sender':from_user.username,'balance':to_user_wallet.amount},
+            subtype='html')
+
+            f=FastMail(env_config)
+            task.add_task(f.send_message, sender_message, template_name='sender.html')
+            task.add_task(f.send_message, receiver_message, template_name='receiver.html')
+
+
             return {
                 "message":"transfer successful",
+                "status_code":"200",
+                "amount":Amount,
+                "receiver":toUser,
+                "txn_charge":"free"
 
             }
         return {

@@ -1,5 +1,5 @@
 import requests
-from fastapi import APIRouter,status,Depends,HTTPException
+from fastapi import APIRouter,status,Depends,HTTPException,BackgroundTasks
 import models
 from database import get_db
 from sqlalchemy.orm import Session
@@ -265,15 +265,18 @@ async def create_monify_account(request:schemas.Bvnreq,user:dict =Depends(get_cu
             account_refference[user.email] = reference
     #  print(bank)
     data = []
-    reserve_account =  reserve.reserve_account( 
-       monnify_credential, 
-       accountReference=reference, 
-       accountName=f"{user.first_name} {user.last_name}", 
-       customerEmail=user.email, 
-       customerName=f"{user.first_name} {user.last_name}", 
-       customerBvn= request.bvn,
-       availableBank=True
-       )
+    try:
+        reserve_account =  reserve.reserve_account( 
+        monnify_credential, 
+        accountReference=reference, 
+        accountName=f"{user.first_name} {user.last_name}", 
+        customerEmail=user.email, 
+        customerName=f"{user.first_name} {user.last_name}", 
+        customerBvn= request.bvn,
+        availableBank=True
+        )
+    except Exception as e:
+        raise HTTPException(status_code=403,detail=e.args)
     data.append(reserve_account)
     # accounts = []
     accounts = data[0]["responseBody"]["accounts"]
@@ -321,9 +324,9 @@ async def check_balance(user:dict = Depends(get_current_user),db:Session = Depen
 
 
 @router.post("/internal/transfer",status_code=status.HTTP_202_ACCEPTED)
-async def internal_wallet_transfer(request:schemas.InternalTransfer,user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
+async def internal_wallet_transfer(request:schemas.InternalTransfer,task:BackgroundTasks,user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
     if request:
-        response = transfer_to_wallet(db=db,toUser=request.toUser,User=user.id,Amount=request.Amount,pin=request.pin)
+        response = transfer_to_wallet(db=db,toUser=request.toUser,User=user.id,Amount=request.Amount,pin=request.pin,task=task)
         return response
 
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="something went wrong shithead...")
