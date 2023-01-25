@@ -48,6 +48,7 @@ def transfer_to_wallet(db:Session,toUser,User,Amount,pin):
             to_user_wallet.amount = to_user_wallet.amount + Amount
             from_user_wallet.amount = from_user_wallet.amount - Amount 
             db.commit()
+            message =  MessageSchema()
             return {
                 "message":"transfer successful",
 
