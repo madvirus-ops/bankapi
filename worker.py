@@ -56,13 +56,13 @@ def transfer_to_wallet(db:Session,toUser,User,Amount,pin,task:BackgroundTasks):
             sender_message = MessageSchema(
             subject='Transaction Alert',
             recipients=[from_user.email],
-            template_body={'amount':Amount, 'user':f'{from_user.username}','receiver':to_user.username},
+            template_body={'amount':Amount, 'user':f'{from_user.username}','receiver':to_user.username,'balance':from_user_wallet.amount},
             subtype='html')
 
             receiver_message = MessageSchema(
             subject='Transaction Alert',
             recipients=[to_user.email],
-            template_body={'amount':Amount, 'user':f'{to_user.username}','sender':from_user.username},
+            template_body={'amount':Amount, 'user':f'{to_user.username}','sender':from_user.username,'balance':to_user_wallet.amount},
             subtype='html')
 
             f=FastMail(env_config)
@@ -72,6 +72,10 @@ def transfer_to_wallet(db:Session,toUser,User,Amount,pin,task:BackgroundTasks):
 
             return {
                 "message":"transfer successful",
+                "status_code":"200",
+                "amount":Amount,
+                "receiver":toUser,
+                "txn_charge":"free"
 
             }
         return {
