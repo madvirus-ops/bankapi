@@ -69,3 +69,22 @@ async def set_current_pin(request:schemas.SetPin, db:Session = Depends(get_db),u
 #         return response.json()
 #     except Exception as e:
 #         return e
+
+@router.get("/profile",status_code=status.HTTP_200_OK)
+async def get_user_profile(user:dict = Depends(get_current_user),db: Session = Depends(get_db)):
+    account_balance = db.query(models.UserAccountBalance).filter(models.UserAccountBalance.user_id == user.id).first()
+    reserved_account = db.query(models.UserReservedAccount).filter(models.UserReservedAccount.user_id == user.id).first()
+    
+    response =  {
+        "username":user.username,
+        "email":user.email,
+        "phoneNumber":user.phoneNumber,
+        "account":{
+            "bankname":reserved_account.bank_name,
+            "accountname":reserved_account.AccountName,
+            "accountNumber":reserved_account.AccountNumber
+            
+        },
+        "balance": account_balance.amount
+    }
+    return response
