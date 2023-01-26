@@ -1,4 +1,6 @@
-from fastapi import APIRouter,Request,Depends
+from fastapi import APIRouter,Request,Depends,BackgroundTasks
+from worker import env_config
+from fastapi_mail import MessageSchema,FastMail
 import models 
 from monnify.monnify import Monnify,MonnifyCredential
 from dotenv import load_dotenv
@@ -19,7 +21,7 @@ mn_secret_key = os.getenv("MONIFY_SECRET_KEY")
 monnify_credential = MonnifyCredential(mn_api_key,mn_secret_key,contract_code,wallet_id,is_live=False)
 
 @router.post("/")
-async def monnify_webhook(request:Request,db:Session = Depends(get_db)):
+async def monnify_webhook(request:Request,task:BackgroundTasks,db:Session = Depends(get_db)):
     body = await request.body()
     data = []
     data.append(body)
@@ -36,6 +38,14 @@ async def monnify_webhook(request:Request,db:Session = Depends(get_db)):
         else:
             old_balancee.amount = old_balancee.amount + amaount
             db.commit()
+        deposit_message = MessageSchema(
+            subject='Transaction Alert',
+            recipients=[user.email],
+            template_body={'amount':amaount, 'user':f'{user.username}','method':'Bank Transfer','balance':old_balancee.amount},
+            subtype='html')
+        
+        f=FastMail(env_config)
+        task.add_task(f.send_message, deposit_message, template_name='deposits.html')
         print("yesss")
     print("no")
 

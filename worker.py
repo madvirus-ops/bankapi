@@ -30,13 +30,16 @@ env_config = ConnectionConfig(
 )
 
 def transfer_to_wallet(db:Session,toUser,User,Amount,pin,task:BackgroundTasks):
+
+    if User.username == toUser:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail=f"comrade {User.username}, what are you doing? why you wan send money to yourself?")
     
     to_user = db.query(models.UserModel).filter(models.UserModel.username == toUser).first()
     if not to_user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"user with name: {toUser} not found")
     to_user_wallet = db.query(models.UserAccountBalance).filter(models.UserAccountBalance.user_id == to_user.id).first()
 
-    from_user = db.query(models.UserModel).filter(models.UserModel.id == User).first()
+    from_user = db.query(models.UserModel).filter(models.UserModel.id == User.id).first()
     from_user_wallet = db.query(models.UserAccountBalance).filter(models.UserAccountBalance.user_id == from_user.id).first()
     from_pinn = db.query(models.UserPin).filter(models.UserPin.user_id == from_user.id).first()
     if not from_pinn:
