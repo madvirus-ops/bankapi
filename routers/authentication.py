@@ -22,7 +22,7 @@ authjwt_secret_key = "random"
 
 
 @router.post("/signup",status_code=status.HTTP_201_CREATED)
-async def create_user(request:schemas.User,db:Session=Depends(get_db)):
+async def create_user(request:schemas.User,task:BackgroundTasks,db:Session=Depends(get_db)):
     verify = get_user_by_email(request.email,db)
     if verify:
         raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,detail="user with email exists")
@@ -35,7 +35,7 @@ async def create_user(request:schemas.User,db:Session=Depends(get_db)):
         subtype='html',
         )
     fm = FastMail(env_config)
-    await fm.send_message(message, template_name="verify_email.html")
+    task.add_task(fm.send_message, message, template_name="verify_email.html")
     return {"message":"email verification sent","user":new_user}
 
 
