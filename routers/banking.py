@@ -326,7 +326,7 @@ async def check_balance(user:dict = Depends(get_current_user),db:Session = Depen
 @router.post("/internal/transfer",status_code=status.HTTP_202_ACCEPTED)
 async def internal_wallet_transfer(request:schemas.InternalTransfer,task:BackgroundTasks,user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
     if request:
-        response = transfer_to_wallet(db=db,toUser=request.toUser,User=user,Amount=request.Amount,pin=request.pin,task=task)
+        response = transfer_to_wallet(db=db,toUser=request.toUser,User=user,Amount=request.Amount,pin=request.pin,task=task,reason=request.reason)
         return response
 
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="something went wrong shithead...")
