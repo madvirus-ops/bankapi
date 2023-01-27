@@ -65,7 +65,7 @@ def transfer_to_wallet(db:Session,toUser,User,Amount,reason,pin,task:BackgroundT
             receiver_message = MessageSchema(
             subject='Transaction Alert',
             recipients=[to_user.email],
-            template_body={'amount':Amount, 'user':f'{to_user.username}','sender':from_user.username,'balance':to_user_wallet.amount,'reason',reason},
+            template_body={'amount':Amount, 'user':f'{to_user.username}','sender':from_user.username,'balance':to_user_wallet.amount,'reason':reason},
             subtype='html')
 
             f=FastMail(env_config)
