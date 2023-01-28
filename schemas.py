@@ -92,6 +92,7 @@ class InternalTransfer(BaseModel):
     toUser:str
     Amount: int
     pin: int
+    reason:str
 
 class SetPin(BaseModel):
     pin1:int
