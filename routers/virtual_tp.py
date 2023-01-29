@@ -31,7 +31,9 @@ async def check_cyber_profile():
 
 
 @router.get("/")
-async def sheit_het():
+async def shet_het():
+    print("cyber data failing")
+    print("what do i do")
     pass
 
 
