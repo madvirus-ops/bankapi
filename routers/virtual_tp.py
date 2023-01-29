@@ -31,4 +31,7 @@ async def check_cyber_profile():
 
 
 @router.get("/")
-print("sjit")
+async def sheit_het():
+    pass
+
+
