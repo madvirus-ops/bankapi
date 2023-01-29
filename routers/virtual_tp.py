@@ -34,6 +34,8 @@ async def check_cyber_profile():
 async def shet_het():
     print("cyber data failing")
     print("what do i do")
+    print("i am doing this for the streaks, dont really have a task for todat")
+    print("fuk this shit")
     pass
 
 
