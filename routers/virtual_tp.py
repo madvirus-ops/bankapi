@@ -27,4 +27,15 @@ async def check_cyber_profile():
     response = requests.get(url,headers=headers)
     if response.status_code == 200:
         return response.text
-    raise HTTPException(status_code=response.status_code,detail=f"{response.text} or {response.json()}")
+    raise HTTPException(status_code=response.status_code,detail=f"{response.text} or {response.reason} ")
+
+
+@router.get("/")
+async def shet_het():
+    print("cyber data failing")
+    print("what do i do")
+    print("i am doing this for the streaks, dont really have a task for todat")
+    print("fuk this shit")
+    pass
+
+
