@@ -1,5 +1,5 @@
 from database import Base
-from sqlalchemy import Column,String,Integer,ForeignKey,Boolean
+from sqlalchemy import Column,String,Integer,ForeignKey,Boolean,DATETIME
 from sqlalchemy.orm import relationship
 
 
@@ -85,6 +85,20 @@ class UserAccountBalance(Base):
 
 
 
+class UserDataTransactions(Base):
+    __tablename__ = 'data_transactions'
+    
+    id = Column(Integer,primary_key=True,index=True)
+    user_id = Column(Integer,ForeignKey('Users.id'))
+    network = Column(Integer)
+    payment_medium = Column(String)
+    mobile_number = Column(String)
+    plan = Column(Integer)
+    status = Column(String)
+    plan_network = Column(String)
+    plan_name = Column(String)
+    plan_amount = Column(String)
+    date = Column(DATETIME)
 
 
 
