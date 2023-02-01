@@ -18,6 +18,7 @@ cyb_key = os.getenv("CYBERDATA_KEY")
 
 @router.get("/user",status_code=status.HTTP_200_OK)
 async def check_cyber_profile():
+    #this endpoint doesn't work
     url = 'https://cyberdata.ng/api/user/'
 
     headers = {
@@ -26,16 +27,24 @@ async def check_cyber_profile():
     }
     response = requests.get(url,headers=headers)
     if response.status_code == 200:
-        return response.text
+        return response.json()
     raise HTTPException(status_code=response.status_code,detail=f"{response.text} or {response.reason} ")
 
 
-@router.get("/")
+@router.get("/user/transactions",description="admin use...")
 async def shet_het():
-    print("cyber data failing")
-    print("what do i do")
-    print("i am doing this for the streaks, dont really have a task for todat")
-    print("fuk this shit")
-    pass
+
+    #to get all transactions related to me
+    #madvirus no forget to move this guy to admin later
+    url = 'https://cyberdata.ng/api/data/'
+    headers = {
+        'Authorization': f'Token {cyb_key}',
+        'Content-Type': 'application/json'
+    }
+    response = requests.get(url,headers=headers)
+    if response.status_code == 200:
+        return response.json()
+    raise HTTPException(status_code=response.status_code,detail=f"{response.text} or {response.reason} ")
+
 
 
