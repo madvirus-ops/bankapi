@@ -30,6 +30,7 @@ class UserModel(Base):
     balance  = relationship("UserAccountBalance",back_populates="user")
     blogs = relationship("BlogModel",back_populates="owner")
     accounts = relationship("UserReservedAccount", back_populates = "user")
+    data_subscriptions = relationship("UserDataTransactions", back_populates = "user")
 
 
 
@@ -99,6 +100,7 @@ class UserDataTransactions(Base):
     plan_name = Column(String)
     plan_amount = Column(String)
     date = Column(DATETIME)
+    user = relationship("UserModel",back_populates= "data_subscriptions")
 
 
 
