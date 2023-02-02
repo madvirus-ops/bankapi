@@ -32,7 +32,7 @@ async def check_cyber_profile():
 
 
 @router.get("/user/transactions",description="admin use...")
-async def shet_het():
+async def get_all_cyber_txns():
 
     #to get all transactions related to me
     #madvirus no forget to move this guy to admin later

@@ -27,6 +27,8 @@ async def create_user(request:schemas.User,task:BackgroundTasks,db:Session=Depen
     if verify:
         raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,detail="user with email exists")
     new_user = UserCrud.create_user(request,db)
+    new_user.email_verifies = True
+    db.commit()
     token = verification_code(new_user.email)
     message = MessageSchema(
         subject="Account Verification Email",
