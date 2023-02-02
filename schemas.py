@@ -97,3 +97,11 @@ class InternalTransfer(BaseModel):
 class SetPin(BaseModel):
     pin1:int
     pin2:int
+
+
+class BuyData(BaseModel):
+    network_id:int
+    mobile_number:int
+    plan_id:int
+    Ported_number:bool
+
