@@ -314,7 +314,11 @@ def acct(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
 async def check_balance(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
     balance = db.query(models.UserAccountBalance).filter(models.UserAccountBalance.user_id == user.id).first()
     if not balance:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="no account balance associated with user")
+        balance = models.UserAccountBalance(user_id=user.id,amount=5000)
+        db.add(balance)
+        db.commit()
+        db.refresh(balance)
+        # raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="no account balance associated with user")
     return {
         "user_email":user.email,
         "balance": f"₦{balance.amount}",
