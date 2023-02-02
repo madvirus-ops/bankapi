@@ -101,7 +101,7 @@ class SetPin(BaseModel):
 
 class BuyData(BaseModel):
     network_id:int
-    mobile_number:int
+    mobile_number:str
     plan_id:int
-    Ported_number:bool
+
 
