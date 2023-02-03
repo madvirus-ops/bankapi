@@ -1,5 +1,6 @@
 from database import Base
 from sqlalchemy import Column,String,Integer,ForeignKey,Boolean,Float,DateTime
+from sqlalchemy.sql import func
 from sqlalchemy.orm import relationship
 
 
@@ -11,7 +12,7 @@ class BlogModel(Base):
     title = Column(String)
     body = Column(String)
     user_id = Column(Integer,ForeignKey('Users.id'))
-    owner = relationship("UserModel",back_populates="blogs")
+    owner = relationship("UserModel",back_populates="blogs",cascade="all, delete-orphan")
 
 
 class UserModel(Base):
@@ -26,11 +27,11 @@ class UserModel(Base):
     password = Column(String)
     email_verifies = Column(Boolean,default = False)
 
-    pin = relationship("UserPin",back_populates="user")
-    balance  = relationship("UserAccountBalance",back_populates="user")
-    blogs = relationship("BlogModel",back_populates="owner")
-    accounts = relationship("UserReservedAccount", back_populates = "user")
-    data_subscriptions = relationship("UserDataTransactions", back_populates = "user")
+    pin = relationship("UserPin",back_populates="user",cascade="all, delete-orphan")
+    balance  = relationship("UserAccountBalance",back_populates="user",cascade="all, delete-orphan")
+    blogs = relationship("BlogModel",back_populates="owner",cascade="all, delete-orphan")
+    accounts = relationship("UserReservedAccount", back_populates = "user",cascade="all, delete-orphan")
+    data_subscriptions = relationship("UserDataTransactions", back_populates = "user",cascade="all, delete-orphan")
 
 
 
@@ -99,10 +100,8 @@ class UserDataTransactions(Base):
     plan_network = Column(String)
     plan_name = Column(String)
     plan_amount = Column(Float)
-    date = Column(DateTime)
+    date = Column(DateTime(timezone=True), server_default=func.now())
     user = relationship("UserModel",back_populates= "data_subscriptions")
-
-
 
 
 
@@ -114,4 +113,3 @@ class DataPlans(Base):
     plan_price = Column(Float)
     network_id = Column(Integer)
     network_name = Column(String)
-    
