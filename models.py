@@ -1,5 +1,5 @@
 from database import Base
-from sqlalchemy import Column,String,Integer,ForeignKey,Boolean,DATETIME
+from sqlalchemy import Column,String,Integer,ForeignKey,Boolean,Float,DateTime
 from sqlalchemy.orm import relationship
 
 
@@ -98,11 +98,20 @@ class UserDataTransactions(Base):
     status = Column(String)
     plan_network = Column(String)
     plan_name = Column(String)
-    plan_amount = Column(String)
-    date = Column(DATETIME)
+    plan_amount = Column(Float)
+    date = Column(DateTime)
     user = relationship("UserModel",back_populates= "data_subscriptions")
 
 
 
 
 
+class DataPlans(Base):
+    __tablename__ = "data_plans"
+    id = Column(Integer,primary_key=True,index=True)
+    plan_id = Column(Integer)
+    plan_name = Column(String)
+    plan_price = Column(Float)
+    network_id = Column(Integer)
+    network_name = Column(String)
+    
