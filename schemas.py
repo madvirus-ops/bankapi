@@ -105,3 +105,4 @@ class BuyData(BaseModel):
     plan_id:int
 
 
+
