@@ -21,10 +21,18 @@ vtu_url = '/api/v1/vtu'
 
 #then make i proceed
 
-def test_root():
+def test_root_success():
     response = client.get("/")
     assert response.status_code == 200
     assert response.json(), {"home":"homepage on"}
+
+
+#this not needed
+def test_root_failed():
+    response = client.get("/root")
+    if response.status_code != 200:
+        assert response.status_code == 404
+        
     
 
 
