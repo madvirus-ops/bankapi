@@ -1,14 +1,30 @@
 from fastapi.testclient import TestClient
-from routers import authentication,banking,post,users,virtual_tp
 from main import app
 
-# client = TestClient(app)
-sec = TestClient(post.router)
 
+client = TestClient(app)
+
+
+
+#to run test i no need import routers since i don do app.include bla bla for main
+#i just need write the full route
+#i go def find better way :)
+
+
+#make i store urls for her
+post_url = '/api/v1/post'
+auth_url = '/api/va/auth'
+bank_url = '/api/v1/core-banking'
+user_url = '/api/va/user'
+vtu_url = '/api/v1/vtu'
+
+
+#then make i proceed
 
 def test_root():
-    response = sec.get("/")
-    assert response.status_code == 404
+    response = client.get("/")
+    assert response.status_code == 200
+    assert response.json(), {"home":"homepage on"}
     
 
 

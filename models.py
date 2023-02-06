@@ -12,7 +12,7 @@ class BlogModel(Base):
     title = Column(String)
     body = Column(String)
     user_id = Column(Integer,ForeignKey('Users.id'))
-    owner = relationship("UserModel",back_populates="blogs",cascade="all, delete-orphan")
+    owner = relationship("UserModel",back_populates="blogs")
 
 
 class UserModel(Base):
