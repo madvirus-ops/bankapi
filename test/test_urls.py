@@ -4,6 +4,9 @@ from main import app
 
 client = TestClient(app)
 
+import os
+os.environ["SQLALCHEMY_SILENCE_UBER_WARNING"] = "1"
+
 
 
 #to run test i no need import routers since i don do app.include bla bla for main
