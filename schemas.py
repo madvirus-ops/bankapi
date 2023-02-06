@@ -104,5 +104,7 @@ class BuyData(BaseModel):
     mobile_number:str
     plan_id:int
 
-
+class resetPassword(BaseModel):
+    username: Optional[str] = None
+    email:Optional[str] = None
 
