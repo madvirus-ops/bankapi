@@ -138,3 +138,12 @@ async def verify_email_code(key:str, db:Session=Depends(get_db)):
         return "something failed"
 
     return {"email verified"}
+
+
+
+
+#reset password
+@router.post("/reset-password")
+# schemas.
+async def reset_password(request:schemas.resetPassword):
+    pass
