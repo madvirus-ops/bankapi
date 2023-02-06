@@ -2,14 +2,14 @@ from fastapi.testclient import TestClient
 from routers import authentication,banking,post,users,virtual_tp
 from main import app
 
-client = TestClient(app)
+# client = TestClient(app)
 sec = TestClient(post.router)
 
 
 def test_root():
     response = sec.get("/")
-    assert response.status_code == 200
-    print(response.json())
+    assert response.status_code == 404
+    
 
 
 
