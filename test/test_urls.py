@@ -38,6 +38,36 @@ def test_root_failed():
         
     
 
+#testing posts.py
+
+def test_to_create_posts():
+    data = {"title":"post 1",
+                "body":"body"}
+    response = client.post(post_url,
+                    headers={'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIiwiZXhwIjoxNjc1NzU5MjI4fQ.2u35gQqfiA-eT_ANyU5veUvOsPuoDGhy2X7HtcK9myQ'},
+                    json=data)
+    assert response.status_code == 201
+    assert response.json()['title'] == data['title']
+
+
+
+def test_to_get_post():
+    response = client.get(post_url)
+    assert response.status_code == 200
+    assert response.json()[0]['body']
+
+
+
+
+def test_get_post_by_id():
+    response = client.get(post_url + '/1')
+    assert response.status_code == 302
+    assert response.json()['body'] 
+
+
+
+
+
 
 
 

@@ -14,7 +14,7 @@ from fastapi_mail import FastMail, MessageSchema, ConnectionConfig, MessageType
 SECRET_KEY='secret'
 ALGORITHM='HS256'
 
-
+#tf
 env_config = ConnectionConfig(
     MAIL_USERNAME = os.getenv("SEND_EMAIL"),
     MAIL_PASSWORD = os.getenv("SEND_EMAIL_PASSWORD"),
