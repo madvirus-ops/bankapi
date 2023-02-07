@@ -1,10 +1,14 @@
 from fastapi.testclient import TestClient
 from main import app
-
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 client = TestClient(app)
+token = os.getenv("TEST_TOKEN")
 
-import os
+
+
 os.environ["SQLALCHEMY_SILENCE_UBER_WARNING"] = "1"
 
 
@@ -14,7 +18,7 @@ os.environ["SQLALCHEMY_SILENCE_UBER_WARNING"] = "1"
 #i go def find better way :)
 
 
-#make i store urls for her
+#make i store urls for here
 post_url = '/api/v1/post'
 auth_url = '/api/va/auth'
 bank_url = '/api/v1/core-banking'
@@ -44,10 +48,25 @@ def test_to_create_posts():
     data = {"title":"post 1",
                 "body":"body"}
     response = client.post(post_url,
-                    headers={'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIiwiZXhwIjoxNjc1NzU5MjI4fQ.2u35gQqfiA-eT_ANyU5veUvOsPuoDGhy2X7HtcK9myQ'},
+                    headers={'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIiwiZXhwIjoxNjc1NzYwOTA1fQ.88d2QMXI8qzBPiu36VUVlSjFApXUwu1f69JXO-lgHfA'},
                     json=data)
     assert response.status_code == 201
     assert response.json()['title'] == data['title']
+
+
+
+
+def test_create_posts_failed():
+    data = {"title":"post 1",
+                "body":"body"}
+    response = client.post(post_url,
+                    headers={'Authorization': f'Bearer h{token}'},
+                    json=data)
+    if response.status_code == 201:
+        assert response.json()['title'] == data['title']
+    assert response.status_code == 401
+
+    
 
 
 
@@ -66,7 +85,7 @@ def test_get_post_by_id():
 
 
 
-
+#testing 
 
 
 
