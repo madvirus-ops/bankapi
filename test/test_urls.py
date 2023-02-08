@@ -95,5 +95,4 @@ def test_get_post_by_id():
 
 print("if you copy this code your laptop go crash")
 print("**blows powder")
-print("my charger don spoili am sad")
-print("fuck"*100, end=" ")
+
