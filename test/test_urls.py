@@ -48,7 +48,7 @@ def test_to_create_posts():
     data = {"title":"post 1",
                 "body":"body"}
     response = client.post(post_url,
-                    headers={'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIiwiZXhwIjoxNjc1NzYwOTA1fQ.88d2QMXI8qzBPiu36VUVlSjFApXUwu1f69JXO-lgHfA'},
+                    headers={'Authorization': f'Bearer {token}'},
                     json=data)
     assert response.status_code == 201
     assert response.json()['title'] == data['title']
