@@ -73,7 +73,9 @@ def test_create_posts_failed():
 def test_to_get_post():
     response = client.get(post_url)
     assert response.status_code == 200
-    assert response.json()[0]['body']
+    print(response.json())
+    assert response.json()['items'][0]['title']
+    
 
 
 

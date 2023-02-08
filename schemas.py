@@ -6,7 +6,15 @@ from typing import Optional
 class Posts(BaseModel):
     title:str
     body:str
-    
+
+  
+class ShowPosts(BaseModel):
+    id:int
+    title:str
+    body:str
+    class Config():
+        orm_mode = True
+
 
 class User(BaseModel):
     username:str
@@ -107,4 +115,13 @@ class BuyData(BaseModel):
 class resetPassword(BaseModel):
     username: Optional[str] = None
     email:Optional[str] = None
+
+
+class BanksResponse(BaseModel):
+    id:int
+    code:str
+    name:str
+
+    class Config():
+        orm_mode = True
 

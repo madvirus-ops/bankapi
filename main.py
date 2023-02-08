@@ -19,3 +19,5 @@ app.include_router(virtual_tp.router)
 @app.get("/")
 async def home():
     return {"home":"homepage on"}
+
+

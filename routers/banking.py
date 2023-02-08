@@ -8,6 +8,7 @@ from utils import get_current_user
 from worker import transfer_to_wallet
 import schemas
 import uuid
+from fastapi_paginate import Page,add_pagination,paginate
 import os
 import json
 from dotenv import load_dotenv
@@ -45,17 +46,17 @@ async def get_banks(user:dict= Depends(get_current_user),db:Session = Depends(ge
     #     db.add(new_data)
     #     db.commit()
 
-    return banks
+    return "use the route "
     
 
 
-@router.get("/banks/")
+@router.get("/banks/",response_model=Page[schemas.BankResponse])
 async def get_banks_list(user:dict= Depends(get_current_user),db:Session = Depends(get_db)):
     """return the lists of banks"""
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Please Authenticate")
     banks = db.query(models.Banks).all()
-    return banks
+    return paginate(banks)
 
 
 
@@ -336,3 +337,4 @@ async def internal_wallet_transfer(request:schemas.InternalTransfer,task:Backgro
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="something went wrong shithead...")
 
 
+add_pagination(router)
