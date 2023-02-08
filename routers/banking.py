@@ -12,6 +12,7 @@ from fastapi_paginate import Page,add_pagination,paginate
 import os
 import json
 from dotenv import load_dotenv
+from monnify.monnify import MonnifyCredential, Monnify
 load_dotenv()
 
 #test keys
@@ -21,9 +22,18 @@ kd_secret_key = os.getenv("KUDA_API_KEY")
 kd_email = os.getenv("KUDA_EMAIL")
 mn_api_key = os.getenv("MONIFY_API_KEY")
 mn_secret_key = os.getenv("MONIFY_SECRET_KEY")
+wallet_id = os.getenv("WALLET_ID")
+contract_code = os.getenv("CONTRACT_CODE")
+
+#init monnify
+reserve = Monnify()
+monnify_credential = MonnifyCredential(mn_api_key,mn_secret_key,contract_code,wallet_id,is_live=False)
+
 
 router = APIRouter(prefix="/api/v1/core-banking",tags=['banking'])
 
+
+#base urls
 kuda_base_url = "https://kuda-openapi-uat.kudabank.com/v​2"
 
 
@@ -242,12 +252,6 @@ async def create_kuda_virtual_account(user:dict =Depends(get_current_user),db:Se
     raise HTTPException(status_code=auth_code.status_code,detail="something went wrong")
 
 
-
-from monnify.monnify import MonnifyCredential, Monnify
-reserve = Monnify()
-wallet_id = os.getenv("WALLET_ID")
-contract_code = os.getenv("CONTRACT_CODE")
-monnify_credential = MonnifyCredential(mn_api_key,mn_secret_key,contract_code,wallet_id,is_live=False)
 
 account_refference = {}
 @router.post("/monnify/virtual-account",status_code=status.HTTP_201_CREATED)
