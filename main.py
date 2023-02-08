@@ -18,4 +18,15 @@ app.include_router(virtual_tp.router)
 
 @app.get("/")
 async def home():
-    return {"home":"homepage on"}
+    res = {
+        'msg':'you dey home, but the route you suppose dey na',
+        'route':'/docs',
+        # 'anoda_msg':'kukuruku cook that thing',
+        'faq':"make i drop some faq:",
+        'na_beans_i_write?':'YES',
+        'e_dey_work?':'YES',
+        'i_go_update?':'Maybe'
+    }
+    return res
+
+

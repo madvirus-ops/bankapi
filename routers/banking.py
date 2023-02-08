@@ -8,9 +8,11 @@ from utils import get_current_user
 from worker import transfer_to_wallet
 import schemas
 import uuid
+from fastapi_paginate import Page,add_pagination,paginate
 import os
 import json
 from dotenv import load_dotenv
+from monnify.monnify import MonnifyCredential, Monnify
 load_dotenv()
 
 #test keys
@@ -20,9 +22,18 @@ kd_secret_key = os.getenv("KUDA_API_KEY")
 kd_email = os.getenv("KUDA_EMAIL")
 mn_api_key = os.getenv("MONIFY_API_KEY")
 mn_secret_key = os.getenv("MONIFY_SECRET_KEY")
+wallet_id = os.getenv("WALLET_ID")
+contract_code = os.getenv("CONTRACT_CODE")
+
+#init monnify
+reserve = Monnify()
+monnify_credential = MonnifyCredential(mn_api_key,mn_secret_key,contract_code,wallet_id,is_live=False)
+
 
 router = APIRouter(prefix="/api/v1/core-banking",tags=['banking'])
 
+
+#base urls
 kuda_base_url = "https://kuda-openapi-uat.kudabank.com/v​2"
 
 
@@ -45,17 +56,17 @@ async def get_banks(user:dict= Depends(get_current_user),db:Session = Depends(ge
     #     db.add(new_data)
     #     db.commit()
 
-    return banks
+    return "use the route "
     
 
 
-@router.get("/banks/")
+@router.get("/banks/",response_model=Page[schemas.BankResponse])
 async def get_banks_list(user:dict= Depends(get_current_user),db:Session = Depends(get_db)):
     """return the lists of banks"""
     if not user:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="Please Authenticate")
     banks = db.query(models.Banks).all()
-    return banks
+    return paginate(banks)
 
 
 
@@ -242,12 +253,6 @@ async def create_kuda_virtual_account(user:dict =Depends(get_current_user),db:Se
 
 
 
-from monnify.monnify import MonnifyCredential, Monnify
-reserve = Monnify()
-wallet_id = os.getenv("WALLET_ID")
-contract_code = os.getenv("CONTRACT_CODE")
-monnify_credential = MonnifyCredential(mn_api_key,mn_secret_key,contract_code,wallet_id,is_live=False)
-
 account_refference = {}
 @router.post("/monnify/virtual-account",status_code=status.HTTP_201_CREATED)
 async def create_monify_account(request:schemas.Bvnreq,user:dict =Depends(get_current_user),db:Session = Depends(get_db)):
@@ -336,3 +341,4 @@ async def internal_wallet_transfer(request:schemas.InternalTransfer,task:Backgro
     raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="something went wrong shithead...")
 
 
+add_pagination(router)
