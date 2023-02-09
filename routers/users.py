@@ -1,10 +1,9 @@
-from fastapi import APIRouter,status,Depends,HTTPException
+from fastapi import APIRouter,status,Depends
 from database import get_db
 import schemas
 import models
-from helpers import get_object_or_404,get_current_user2
+from helpers import get_object_or_404
 from utils import get_current_user
-import requests
 import os
 from dotenv import load_dotenv
 load_dotenv()
