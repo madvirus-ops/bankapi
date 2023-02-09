@@ -3,14 +3,12 @@ from fastapi import APIRouter,status,Depends,HTTPException,BackgroundTasks
 import models
 from database import get_db
 from sqlalchemy.orm import Session
-import base64
 from utils import get_current_user
 from worker import transfer_to_wallet
 import schemas
 import uuid
 from fastapi_paginate import Page,add_pagination,paginate
 import os
-import json
 from dotenv import load_dotenv
 from monnify.monnify import MonnifyCredential, Monnify
 load_dotenv()
