@@ -105,11 +105,12 @@ class UserDataTransactions(Base):
 
 
 
-class DataPlans(Base):
+class CyberDataPlans(Base):
     __tablename__ = "data_plans"
     id = Column(Integer,primary_key=True,index=True)
     plan_id = Column(Integer)
-    plan_name = Column(String)
     plan_price = Column(Float)
-    network_id = Column(Integer)
-    network_name = Column(String)
+    network = Column(String)
+    size = Column(String)
+    validity = Column(String)
+

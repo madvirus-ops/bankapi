@@ -6,10 +6,12 @@ from sqlalchemy.orm import Session
 import schemas
 from worker import env_config
 from fastapi_mail import MessageSchema,FastMail
+from fastapi_paginate import Page,paginate,add_pagination
 from dotenv import load_dotenv
 load_dotenv()
 import os
 import requests
+
 
 
 router = APIRouter(prefix="/api/v1/vtu",tags=['virtual top up'])
@@ -74,3 +76,12 @@ async def buy_vtu_data(request:schemas.BuyData,db: Session = Depends(get_db),use
         raise HTTPException(status_code=response.status_code,detail=f"{response.text} or {response.reason} ")
     else:
         raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED,detail=f"insufficient balance")
+
+@router.get('/data-plans',response_model=Page[schemas.Dataplans],status_code=status.HTTP_200_OK)
+async def get_data_price_list(db:Session = Depends(get_db)):
+    plans = db.query(models.CyberDataPlans).all()
+    if not plans:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="no data plans")
+    return paginate(plans)
+
+add_pagination(router)
