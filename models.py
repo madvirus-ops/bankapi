@@ -114,3 +114,8 @@ class CyberDataPlans(Base):
     size = Column(String)
     validity = Column(String)
 
+class CyberNetwork(Base):
+    __tablename__ = "network"
+    id = Column(Integer,primary_key=True,index=True)
+    name = Column(String)
+    network_id = Column(Integer)
