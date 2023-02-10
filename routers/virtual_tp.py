@@ -53,8 +53,9 @@ async def get_all_cyber_txns():
 
 @router.post("/buy-data",status_code=status.HTTP_202_ACCEPTED)
 async def buy_vtu_data(request:schemas.BuyData,db: Session = Depends(get_db),user:dict = Depends(get_current_user)):
-    bal = db.query(models.UserAccountBalance).filter(models.UserAccountBalance.user_id == user.id).first()
-    if not bal:
+    user_bal = db.query(models.UserAccountBalance).filter(models.UserAccountBalance.user_id == user.id).first()
+    plan = db.query(models.CyberDataPlans).filter(models.CyberDataPlans.plan_id == request.plan_id).first()
+    if not user_bal and plan:
         raise HTTPException(status.HTTP_404_NOT_FOUND,detail="not found")
     
     url = 'https://cyberdata.ng/api/data/'
@@ -62,16 +63,22 @@ async def buy_vtu_data(request:schemas.BuyData,db: Session = Depends(get_db),use
         'Authorization': f'Token {cyb_key}',
         'Content-Type': 'application/json'
     }
+
+
     body = {
             "network": request.network_id,
             "mobile_number": request.mobile_number,
-            "plan": 7,
+            "plan": request.plan_id,
             "Ported_number": True,
             "payment_medium": "MAIN WALLET" or  "SME DATA BALANCE" or "AIRTEL_CG DATA BALANCE"
         }
-    if bal.amount >= 300:
+
+
+    if user_bal.amount >= plan.plan_price:
         response = requests.post(url,headers=headers,data=body)
-        if response.status_code == 200:
+        if response.status_code in (200,201):
+            user_bal.amount = user_bal.amount - plan.plan_price
+            db.commit()
             return response.json()
         raise HTTPException(status_code=response.status_code,detail=f"{response.text} or {response.reason} ")
     else:
@@ -83,6 +90,14 @@ async def get_data_price_list(db:Session = Depends(get_db)):
     if not plans:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="no data plans")
     return paginate(plans)
+
+
+@router.get('/networks',status_code=status.HTTP_200_OK)
+async def get_data_price_list(db:Session = Depends(get_db)):
+    networks = db.query(models.CyberDataPlans).all()
+    if not networks:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="no data plans")
+    return networks
 
 
 # from bss import network,plans
