@@ -125,3 +125,12 @@ class BanksResponse(BaseModel):
     class Config():
         orm_mode = True
 
+class Dataplans(BaseModel):
+    plan_id:int
+    plan_price:float
+    network:str
+    size:str
+    validity:str
+
+    class Config():
+        orm_mode = True

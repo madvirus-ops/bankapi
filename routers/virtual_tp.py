@@ -6,10 +6,12 @@ from sqlalchemy.orm import Session
 import schemas
 from worker import env_config
 from fastapi_mail import MessageSchema,FastMail
+from fastapi_paginate import Page,paginate,add_pagination
 from dotenv import load_dotenv
 load_dotenv()
 import os
 import requests
+
 
 
 router = APIRouter(prefix="/api/v1/vtu",tags=['virtual top up'])
@@ -74,3 +76,43 @@ async def buy_vtu_data(request:schemas.BuyData,db: Session = Depends(get_db),use
         raise HTTPException(status_code=response.status_code,detail=f"{response.text} or {response.reason} ")
     else:
         raise HTTPException(status_code=status.HTTP_402_PAYMENT_REQUIRED,detail=f"insufficient balance")
+
+@router.get('/data-plans',response_model=Page[schemas.Dataplans],status_code=status.HTTP_200_OK)
+async def get_data_price_list(db:Session = Depends(get_db)):
+    plans = db.query(models.CyberDataPlans).all()
+    if not plans:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="no data plans")
+    return paginate(plans)
+
+
+# from bss import network,plans
+# @router.post("/add networks")
+# async def add_networks(db:Session = Depends(get_db)):
+#     for key in network:
+#         new = models.CyberNetwork(
+#         name = key['network_name'],
+#         network_id = int(key['network_id'])
+#         )
+#         db.add(new)
+#         db.commit()
+    
+    
+# @router.post("/add-plans")
+# async def add_files(db:Session = Depends(get_db)):
+#     for key in plans:
+#         print(key['data_id'])
+#         print("="*20)
+#         try:
+#             new = models.CyberDataPlans(
+#             plan_id = key['data_id'],
+#             plan_price = key['Amount'],
+#             network = key['Network'],
+#             size = key['Size'],
+#             validity = key['Validity']
+#             )
+#             db.add(new)
+#             db.commit()
+#         except Exception as e:
+#             return e.args
+
+add_pagination(router)
