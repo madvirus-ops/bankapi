@@ -29,9 +29,11 @@ async def check_cyber_profile():
         'Authorization': f'Token {cyb_key}',
         'Content-Type': 'application/json'
     }
-    response = requests.get(url,headers=headers)
+    payload = {}
+    # response = requests.get(url,headers=headers,data=payload)
+    response = requests.request("GET",url,headers=headers,data=payload)
     if response.status_code == 200:
-        return response.json()
+        return response.text
     raise HTTPException(status_code=response.status_code,detail=f"{response.text} or {response.reason} ")
 
 
