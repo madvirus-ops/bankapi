@@ -30,8 +30,8 @@ async def check_cyber_profile():
         'Content-Type': 'application/json'
     }
     payload = {}
-    # response = requests.get(url,headers=headers,data=payload)
-    response = requests.request("GET",url,headers=headers,data=payload)
+    response = requests.get(url,headers=headers,data=payload)
+    
     if response.status_code == 200:
         return response.text
     raise HTTPException(status_code=response.status_code,detail=f"{response.text} or {response.reason} ")
