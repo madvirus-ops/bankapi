@@ -36,14 +36,14 @@ async def create_post(post:schemas.Posts,user:dict = Depends(get_current_user),d
 
 
 @router.delete("/{id}",status_code=status.HTTP_204_NO_CONTENT)
-async def delete_post(id:int,db:Session= Depends(get_db)):
+async def delete_post(id:int,user:dict = Depends(get_current_user),db:Session= Depends(get_db)):
     return BlogCrud.delete(db,id)
 
 
 
 
 @router.put("/{id}",status_code=status.HTTP_202_ACCEPTED)
-async def update(id:int,request:schemas.Posts,db:Session= Depends(get_db)):
+async def update(id:int,request:schemas.Posts,user:dict = Depends(get_current_user),db:Session= Depends(get_db)):
     return BlogCrud.update(db,id,request)
     
 
