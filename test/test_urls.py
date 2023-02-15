@@ -90,7 +90,11 @@ def test_get_post_by_id():
 #testing 
 
 
-
+def test_get_bank():
+    url = bank_url + '/banks/'
+    response = client.get(url)
+    assert response.status_code == 200
+    
 
 
 
