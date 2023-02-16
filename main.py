@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import post,users,authentication,banking,webhook,virtual_tp
+from routers import post,users,authentication,banking,webhook,virtual_tp,admin,admin_authentication
 import models
 from database import engine
 
@@ -15,6 +15,8 @@ app.include_router(users.router)
 app.include_router(banking.router)
 app.include_router(webhook.router)
 app.include_router(virtual_tp.router)
+app.include_router(admin_authentication.router)
+app.include_router(admin.router)
 
 @app.get("/")
 async def home():

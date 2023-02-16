@@ -25,13 +25,29 @@ class UserModel(Base):
     email = Column(String,unique=True)
     phoneNumber = Column(String)
     password = Column(String)
-    email_verifies = Column(Boolean,default = False)
+    email_verified = Column(Boolean,default = False)
+
 
     pin = relationship("UserPin",back_populates="user",cascade="all, delete-orphan")
     balance  = relationship("UserAccountBalance",back_populates="user",cascade="all, delete-orphan")
     blogs = relationship("BlogModel",back_populates="owner",cascade="all, delete-orphan")
     accounts = relationship("UserReservedAccount", back_populates = "user",cascade="all, delete-orphan")
     data_subscriptions = relationship("UserDataTransactions", back_populates = "user",cascade="all, delete-orphan")
+
+
+
+class AdminModel(Base):
+    __tablename__ = 'admin'
+
+    id = Column(Integer,primary_key=True,index=True)
+    username = Column(String,unique=True)
+    first_name = Column(String)
+    last_name = Column(String)
+    email = Column(String,unique=True)
+    phoneNumber = Column(String)
+    password = Column(String)
+    email_verified = Column(Boolean,default = False)
+    vtu_balance = Column(Integer,default = 10)
 
 
 
