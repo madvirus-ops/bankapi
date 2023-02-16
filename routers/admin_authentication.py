@@ -15,9 +15,9 @@ from crud import AdminCrud
 from datetime import timedelta
 
 
-router = APIRouter(prefix="/api/v1/auth",tags=['admin_auth'])
+router = APIRouter(prefix="/api/v1/admin/auth",tags=['admin_auth'])
 
-authjwt_secret_key = "random"
+authjwt_secret_key = SECRET_KEY
 
 
 

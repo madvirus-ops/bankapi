@@ -47,6 +47,7 @@ class AdminModel(Base):
     phoneNumber = Column(String)
     password = Column(String)
     email_verified = Column(Boolean,default = False)
+    vtu_balance = Column(Integer,default = 10)
 
 
 
