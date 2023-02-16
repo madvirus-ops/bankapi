@@ -11,11 +11,11 @@ from worker import verification_code,verification_email,env_config,verify_token
 
 from utils import create_access_token,SECRET_KEY,access_cookies_time,ACCESS_TOKEN_LIFETIME_MINUTES,ALGORITHM,refresh_cookies_time,REFRESH_TOKEN_LIFETIME
 from fastapi_jwt_auth import AuthJWT
-from crud import UserCrud
+from crud import AdminCrud
 from datetime import timedelta
 
 
-router = APIRouter(prefix="/api/v1/auth",tags=['auth'])
+router = APIRouter(prefix="/api/v1/auth",tags=['admin_auth'])
 
 authjwt_secret_key = "random"
 
@@ -23,15 +23,15 @@ authjwt_secret_key = "random"
 
 @router.post("/signup",status_code=status.HTTP_201_CREATED)
 async def create_user(request:schemas.User,task:BackgroundTasks,db:Session=Depends(get_db)):
-    verify = get_user_by_email(email=request.email,db=db,model=models.UserModel)
+    verify = get_user_by_email(email=request.email,db=db,model=models.AdminModel)
     if verify:
         raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,detail="user with email exists")
-    new_user = UserCrud.create_user(request,db)
+    new_user =AdminCrud.create_admin_user(request,db)
     # new_user.email_verifies = True
-    db.commit()
+    # db.commit()
     token = verification_code(new_user.email)
     message = MessageSchema(
-        subject="Account Verification Email",
+        subject="Admin Account Verification Email",
         recipients=[new_user.email], 
         template_body={'token':token, 'user':f'{new_user.username}',},
         subtype='html',
@@ -68,35 +68,35 @@ def resend_email_verification_code(task:BackgroundTasks,email:str, db:Session=De
 
 
 
-@router.post("/login")
-async def log_user_in(response:Response,request:OAuth2PasswordRequestForm = Depends(),db:Session = Depends(get_db)):
-    user = get_user_by_email(email=request.email,db=db,model=models.UserModel)
-    # user.email_verifies = False
-    # db.commit()
-    if not user:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Credentials")
-    if not verify_password(request.password,user.password):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Password")
-    if user.email_verifies == False:
-        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail="email not verified, verification email sent again!!!!")
-    access_token = create_access_token(data={"sub":user.email})
+# @router.post("/login")
+# async def log_user_in(response:Response,request:OAuth2PasswordRequestForm = Depends(),db:Session = Depends(get_db)):
+#     user = get_user_by_email(email=request.username,db=db,model=models.UserModel)
+#     # user.email_verifies = False
+#     # db.commit()
+#     if not user:
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Credentials")
+#     if not verify_password(request.password,user.password):
+#         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Password")
+#     if user.email_verifies == False:
+#         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail="email not verified, verification email sent again!!!!")
+#     access_token = create_access_token(data={"sub":user.email})
 
     
 
-    response.set_cookie(key="access_token",
-                        value=access_token,
-                        max_age=timedelta(minutes=15),
-                        expires=timedelta(minutes=15))
-    return {"access_token":access_token,"token_type":"bearer","user":user}
+#     response.set_cookie(key="access_token",
+#                         value=access_token,
+#                         max_age=timedelta(minutes=15),
+#                         expires=timedelta(minutes=15))
+#     return {"access_token":access_token,"token_type":"bearer","user":user}
 
 
 
     
  
-@router.post("/v2/login",)
+@router.post("/login",)
 async def login_jwt(response:Response,request:schemas.Login,db:Session = Depends(get_db),Authorize:AuthJWT=Depends()):
-    """second route to login using schemas and also sets some shits wiht refresh and access toeken"""
-    user = get_user_by_email(email=request.username,db=db,model=models.UserModel)
+    """admin auth"""
+    user = get_user_by_email(email=request.email,db=db,model=models.AdminModel)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Credentials")
     if not verify_password(request.password,user.password):

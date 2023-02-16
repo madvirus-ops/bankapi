@@ -29,8 +29,8 @@ def verify_password(plain_password,hashed_password):
 
 
 
-def get_user_by_email(email,db:Session):
-    user = db.query(models.UserModel).filter(models.UserModel.email == email).first()
+def get_user_by_email(email,db:Session,model):
+    user = db.query(model).filter(model.email == email).first()
     return user
 
 
