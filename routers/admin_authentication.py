@@ -96,7 +96,7 @@ def resend_email_verification_code(task:BackgroundTasks,email:str, db:Session=De
 @router.post("/login",)
 async def login_jwt(response:Response,request:schemas.Login,db:Session = Depends(get_db),Authorize:AuthJWT=Depends()):
     """admin auth"""
-    user = get_user_by_email(email=request.email,db=db,model=models.AdminModel)
+    user = get_user_by_email(email=request.username,db=db,model=models.AdminModel)
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Credentials")
     if not verify_password(request.password,user.password):
