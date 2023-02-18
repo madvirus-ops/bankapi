@@ -133,7 +133,7 @@ def refresh_token(response:Response,Authorization:AuthJWT=Depends(), refresh_tok
 @router.get('/verify-email/')
 async def verify_email_code(key:str, db:Session=Depends(get_db)):
     tok = key
-    dd = verification_email(token=tok,db=db)
+    dd = verification_email(token=tok,db=db,model=models.UserModel)
     if not dd:
         return "something failed"
 

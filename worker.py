@@ -98,12 +98,12 @@ def verification_code(email):
     return encoded
 
 
-def verification_email(token, db:Session):
+def verification_email(token, db:Session,model):
     exception= HTTPException(status_code=400,  detail='invalid token or token has expired')
     userexception= HTTPException(status_code=400,  detail='no user')
     try:
         payload = jwt.decode(token,'secret',algorithms='HS256')
-        user = db.query(models.UserModel).filter(models.UserModel.email == payload.get('sub')).first()
+        user = db.query(model).filter(model.email == payload.get('sub')).first()
         if payload.get('type') != 'verify_email_code':
             raise exception
         elif not user:
