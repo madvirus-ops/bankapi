@@ -30,10 +30,10 @@ async def check_cyber_profile():
         'Content-Type': 'application/json'
     }
     payload = {}
-    response = requests.get(url,headers=headers,data=payload,verify=False)
+    response = requests.get(url,headers=headers)
     
     if response.status_code == 200:
-        return response.text
+        return response.json()
     raise HTTPException(status_code=response.status_code,detail=f"{response.text} or {response.reason} ")
 
 
@@ -47,7 +47,7 @@ async def get_all_cyber_txns():
         'Authorization': f'Token {cyb_key}',
         'Content-Type': 'application/json'
     }
-    response = requests.get(url,headers=headers,verify=False)
+    response = requests.get(url,headers=headers)
     if response.status_code == 200:
         return response.json()
     raise HTTPException(status_code=response.status_code,detail=f"{response.text} or {response.reason} ")
