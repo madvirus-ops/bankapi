@@ -31,13 +31,13 @@ async def create_user(request:schemas.User,task:BackgroundTasks,db:Session=Depen
     # db.commit()
     token = verification_code(new_user.email)
     message = MessageSchema(
-        subject="Admin Account Verification Email",
+        subject="Admin Verification Email",
         recipients=[new_user.email], 
         template_body={'token':token, 'user':f'{new_user.username}',},
         subtype='html',
         )
     fm = FastMail(env_config)
-    task.add_task(fm.send_message, message, template_name="verify_email.html")
+    task.add_task(fm.send_message, message, template_name="admin_verify.html")
     return {"message":"email verification sent","user":new_user}
 
 
@@ -55,13 +55,13 @@ def resend_email_verification_code(task:BackgroundTasks,email:str, db:Session=De
         #     raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,detail="your email is verified")
         token=verification_code(User.email) 
         message=MessageSchema(
-            subject='Account Verification Email',
+            subject='Admin Verification Email',
             recipients=[User.email],
             template_body={'token':token, 'user':f'{User.username}'},
             subtype='html'
         )
         f=FastMail(env_config)
-        task.add_task(f.send_message, message, template_name='verify_email.html')
+        task.add_task(f.send_message, message, template_name='admin_verify.html')
         return {'message':'verification code sent'}
     except:
         raise HTTPException(detail='user with this email does not exists', status_code=400)
