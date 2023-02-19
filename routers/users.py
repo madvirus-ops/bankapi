@@ -1,8 +1,8 @@
-from fastapi import APIRouter,status,Depends
+from fastapi import APIRouter,status,Depends,UploadFile,File
 from database import get_db
 import schemas
 import models
-from helpers import get_object_or_404
+from helpers import get_object_or_404,get_image_url
 from utils import get_current_user
 import os
 from dotenv import load_dotenv
@@ -84,6 +84,34 @@ async def set_current_pin(request:schemas.SetPin, db:Session = Depends(get_db),u
             return {"pin set successfully"}
         return {"pins do not match"}
     return {"something went wrong"}
+
+
+@router.post("/upload-image",description="to upload profile image",status_code=status.HTTP_201_CREATED)
+async def upload_user_profile(image: UploadFile = File(...), user:dict=Depends(get_current_user), db:Session = Depends(get_db)):
+    file = await get_image_url(file=image,user=user)
+    profile = db.query(models.UserModel).filter(models.UserModel.id == user.id).first()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 # @router.post("/kuda-token")
 # async def get_user_token(request:schemas.KudaKey):
