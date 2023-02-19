@@ -1,7 +1,9 @@
-from fastapi import status,HTTPException,Cookie,Header,Depends
+from fastapi import status,HTTPException,Cookie,Header,Depends,UploadFile,File
 from passlib.context import CryptContext
 import models
 from sqlalchemy.orm import Session
+from PIL import Image
+import secrets
 from fastapi_jwt_auth import AuthJWT
 import uuid
 from database import get_db
@@ -59,3 +61,30 @@ def get_current_user2(Authorize:AuthJWT=Depends(), db:Session=Depends(get_db), a
 def generate_uuid(name):
     name = uuid.uuid4()
     return name
+
+
+
+
+
+async def get_image_url(file: UploadFile = File(...),user:dict = Depends()):
+    FILEPATH = "./static/"
+    filename = file.filename
+    ext = filename.split(".")[1]
+    if ext not in ['png', 'jpg','webp']:
+        return {'status': "error", 'detail':"Image type not allowed"}
+    token_name= user.username+"_"+"profile_image"+"_"+secrets.token_urlsafe(4)+"."+ext
+    generated_name=FILEPATH + token_name
+    file_content= await file.read()
+
+    with open(generated_name, 'wb') as file:
+        file.write(file_content)
+
+    # PILLOW IMAGE RESIZE
+    img = Image.open(generated_name)
+    resized_image = img.resize(size=(500,500))
+    resized_image.save(generated_name)
+    
+    file.close()
+    file_url = generated_name[1:]
+    return file_url
+    
