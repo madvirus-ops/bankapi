@@ -72,7 +72,7 @@ async def get_image_url(file: UploadFile = File(...),user:dict = Depends()):
     ext = filename.split(".")[1]
     if ext not in ['png', 'jpg','webp']:
         return {'status': "error", 'detail':"Image type not allowed"}
-    token_name= user.username+"profile_image"+secrets.token_hex(8)+"."+ext
+    token_name= user.username+"_"+"profile_image"+"_"+secrets.token_urlsafe(4)+"."+ext
     generated_name=FILEPATH + token_name
     file_content= await file.read()
 
@@ -81,7 +81,7 @@ async def get_image_url(file: UploadFile = File(...),user:dict = Depends()):
 
     # PILLOW IMAGE RESIZE
     img = Image.open(generated_name)
-    resized_image = img.resize(size=(200, 200))
+    resized_image = img.resize(size=(500,500))
     resized_image.save(generated_name)
     
     file.close()

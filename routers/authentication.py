@@ -70,14 +70,15 @@ def resend_email_verification_code(task:BackgroundTasks,email:str, db:Session=De
 
 @router.post("/login")
 async def log_user_in(response:Response,request:OAuth2PasswordRequestForm = Depends(),db:Session = Depends(get_db)):
-    user = get_user_by_email(email=request.email,db=db,model=models.UserModel)
+    user = get_user_by_email(email=request.username,db=db,model=models.UserModel)
     # user.email_verifies = False
     # db.commit()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Credentials")
     if not verify_password(request.password,user.password):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="Invalid Password")
-    if user.email_verifies == False:
+    if user.email_verified == False:
+        print("this fucker")
         raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE,detail="email not verified, verification email sent again!!!!")
     access_token = create_access_token(data={"sub":user.email})
 
@@ -134,10 +135,8 @@ def refresh_token(response:Response,Authorization:AuthJWT=Depends(), refresh_tok
 async def verify_email_code(key:str, db:Session=Depends(get_db)):
     tok = key
     dd = verification_email(token=tok,db=db,model=models.UserModel)
-    if not dd:
-        return "something failed"
+    return "email verified" if dd else "not verified"
 
-    return {"email verified"}
 
 
 

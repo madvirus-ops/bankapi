@@ -6,6 +6,7 @@ from fastapi.security import OAuth2PasswordBearer
 from helpers import get_user_by_email
 from sqlalchemy.orm import Session
 import schemas
+import models
 from database import get_db
 
 
@@ -47,7 +48,7 @@ async def get_current_user(token:str = Depends(oauth2_scheme),db:Session = Depen
         token_data = schemas.TokenData(email=email)
     except JWTError:
         raise cred_error
-    user = get_user_by_email(token_data.email,db)
+    user = get_user_by_email(email=token_data.email,db=db,model=models.UserModel)
     if user is None:
         raise cred_error
     return user

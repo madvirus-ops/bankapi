@@ -108,7 +108,7 @@ def verification_email(token, db:Session,model):
             raise exception
         elif not user:
             raise userexception 
-        user.email_verifies = True
+        user.email_verified = True
         db.commit()
         return {"payload":payload,"user":user}
     except Exception as e:
