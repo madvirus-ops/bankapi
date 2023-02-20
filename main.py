@@ -5,6 +5,7 @@ from database import engine
 from fastapi.staticfiles import StaticFiles
 
 
+
 app = FastAPI(title="Meli Api",description="mimicking the backend of basic fintech app")
 
 
@@ -21,6 +22,7 @@ app.include_router(admin_authentication.router)
 app.include_router(admin.router)
 
 app.mount("/static", StaticFiles(directory="./static"), name="static")
+app.mount("/media/profile_image",StaticFiles(directory="./media/profile_image"),name="media")
 
 @app.get("/")
 async def home():

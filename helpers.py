@@ -67,7 +67,7 @@ def generate_uuid(name):
 
 
 async def get_image_url(file: UploadFile = File(...),user:dict = Depends()):
-    FILEPATH = "./static/"
+    FILEPATH = "./media/profile_image/"
     filename = file.filename
     ext = filename.split(".")[1]
     if ext not in ['png', 'jpg','webp']:
