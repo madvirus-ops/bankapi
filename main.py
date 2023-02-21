@@ -2,6 +2,10 @@ from fastapi import FastAPI
 from routers import post,users,authentication,banking,webhook,virtual_tp,admin,admin_authentication
 import models
 from database import engine
+import requests
+import os
+from dotenv import load_dotenv
+load_dotenv()
 from fastapi.staticfiles import StaticFiles
 
 
@@ -37,4 +41,17 @@ async def home():
     }
     return res
 
-
+app.on_event('startup')
+def do_some_precheck():
+    cyb_key = os.getenv("CYBERDATA_KEY")
+    url = 'https://cyberdata.ng/api/user/'
+    headers = {
+        'Authorization': f'Token {cyb_key}',
+        'Content-Type': 'application/json'
+    }
+    response = requests.get(url,headers=headers)
+    if response.status_code == 200:
+        # return response.json()
+        print(response.json())
+    print(response.status_code,"===>",response.json())
+    
