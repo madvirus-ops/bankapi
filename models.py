@@ -25,7 +25,7 @@ class UserModel(Base):
     email = Column(String,unique=True)
     phoneNumber = Column(String)
     password = Column(String)
-    profile_image = Column(String,default='/static/image.png')
+    profile_image = Column(String,default='/media/profile_image/image.png')
     email_verified = Column(Boolean,default = False)
 
 

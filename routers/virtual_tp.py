@@ -95,8 +95,8 @@ async def get_data_price_list(db:Session = Depends(get_db)):
 
 
 @router.get('/networks',status_code=status.HTTP_200_OK)
-async def get_ll_networks(db:Session = Depends(get_db)):
-    networks = db.query(models.CyberDataPlans).all()
+async def get_all_networks(db:Session = Depends(get_db)):
+    networks = db.query(models.CyberNetwork).all()
     if not networks:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="no data plans")
     return networks
@@ -115,7 +115,7 @@ async def add_networks(db:Session = Depends(get_db)):
     
     
 @router.post("/add-plans")
-async def add_files(db:Session = Depends(get_db)):
+async def add_data_plans(db:Session = Depends(get_db)):
     for key in plans:
         print(key['data_id'])
         print("="*20)
@@ -131,5 +131,5 @@ async def add_files(db:Session = Depends(get_db)):
             db.commit()
         except Exception as e:
             return e.args
-
+    return new
 add_pagination(router)
