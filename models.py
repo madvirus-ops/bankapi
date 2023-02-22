@@ -5,6 +5,7 @@ from sqlalchemy.orm import relationship
 
 
 
+
 class BlogModel(Base):
     __tablename__ = 'Blog'
 

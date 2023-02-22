@@ -71,7 +71,7 @@ async def get_image_url(file: UploadFile = File(...),user:dict = Depends()):
     filename = file.filename
     ext = filename.split(".")[1]
     if ext not in ['png', 'jpg','webp']:
-        return {'status': "error", 'detail':"Image type not allowed"}
+        raise HTTPException(status_code=status.HTTP_406_NOT_ACCEPTABLE, detail="Image type not allowed")
     token_name= user.username+"_"+"profile_image"+"_"+secrets.token_urlsafe(4)+"."+ext
     generated_name=FILEPATH + token_name
     file_content= await file.read()
