@@ -4,13 +4,28 @@ import models
 from database import engine
 import requests
 import os
+from fastapi.middleware.cors import CORSMiddleware
+# from celery import Celery
+# celery = Celery()
+from fastapi.middleware import Middleware
 from dotenv import load_dotenv
 load_dotenv()
 from fastapi.staticfiles import StaticFiles
 
 
 
-app = FastAPI(title="Meli Api",description="mimicking the backend of basic fintech app")
+app = FastAPI(title="Meli Api",description="mimicking the backend of basic virtual top up app")
+
+
+middleware = [
+    Middleware(
+        CORSMiddleware,
+        allow_origins=['*'],
+        allow_credentials=True,
+        allow_methods=['*'],
+        allow_headers=['*']
+    )
+]
 
 
 
