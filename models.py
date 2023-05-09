@@ -35,6 +35,7 @@ class UserModel(Base):
     blogs = relationship("BlogModel",back_populates="owner",cascade="all, delete-orphan")
     accounts = relationship("UserReservedAccount", back_populates = "user",cascade="all, delete-orphan")
     data_subscriptions = relationship("UserDataTransactions", back_populates = "user",cascade="all, delete-orphan")
+    mapple_id = relationship("MappleradCustomer", back_populates="user",cascade="all, delete-orphan")
 
 
 
@@ -137,3 +138,14 @@ class CyberNetwork(Base):
     id = Column(Integer,primary_key=True,index=True)
     name = Column(String)
     network_id = Column(Integer)
+
+
+
+class MappleradCustomer(Base):
+    __tablename__ = "mapple_customers"
+    id = Column(Integer,primary_key=True,index=True)
+    user_id = Column(Integer,ForeignKey('Users.id'))
+    customer_id = Column(String)
+    user = relationship("UserModel",back_populates= "mapple_id")
+
+    
