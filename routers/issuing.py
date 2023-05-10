@@ -29,12 +29,12 @@ async def create_mapplerad_customer_endpoint(user:dict= Depends(get_current_user
     if not user:
         return "user not fount"
     created_user =  create_mapplerad_customer(user_id=user.id, db=db)
-    if not created_user:
-        return "error ooooo"
+    if created_user is None:
+        raise HTTPException(400,detail="customer is not")
     print(created_user)
     new_customer = MappleradCustomer(
         user_id = user.id,
-        customer_id = created_user['id']
+        customer_id = created_user
     )
     db.add(new_customer)
     db.commit()
