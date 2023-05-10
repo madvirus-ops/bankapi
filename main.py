@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from routers import post,users,authentication,banking,webhook,virtual_tp,admin,admin_authentication
+from routers import post,users,authentication,banking,webhook,virtual_tp,admin,admin_authentication,issuing
 import models
 from database import engine
 import requests
@@ -39,6 +39,7 @@ app.include_router(webhook.router)
 app.include_router(virtual_tp.router)
 app.include_router(admin_authentication.router)
 app.include_router(admin.router)
+app.include_router(issuing.router)
 
 app.mount("/static", StaticFiles(directory="./static"), name="static")
 app.mount("/media/profile_image",StaticFiles(directory="./media/profile_image"),name="media")

@@ -1,8 +1,13 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
+from dotenv import load_dotenv
+import os
+load_dotenv()
 
 
-engine = create_engine('sqlite:///blog.db',echo=True,connect_args={"check_same_thread":False})
+db_url = os.getenv('SQLALCHEMY_DATABASE_URL')
+
+engine = create_engine(db_url,echo=True)
 
 Base = declarative_base()
 
