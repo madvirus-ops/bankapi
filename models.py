@@ -36,6 +36,7 @@ class UserModel(Base):
     accounts = relationship("UserReservedAccount", back_populates = "user",cascade="all, delete-orphan")
     data_subscriptions = relationship("UserDataTransactions", back_populates = "user",cascade="all, delete-orphan")
     mapple_id = relationship("MappleradCustomer", back_populates="user",cascade="all, delete-orphan")
+    dollar_card = relationship("VirtualCards", back_populates="user",cascade="all, delete-orphan")
 
 
 
@@ -149,3 +150,32 @@ class MappleradCustomer(Base):
     user = relationship("UserModel",back_populates= "mapple_id")
 
     
+
+
+class VirtualCards(Base):
+    __tablename__ = "virtual_cards"
+    id = Column(Integer,primary_key=True,index=True)
+    user_id = Column(Integer,ForeignKey('Users.id'))
+    card_id = Column(String,default="")
+    customer_id = Column(String,default="")
+    card_name = Column(String,default="")
+    card_number = Column(String,default="")
+    masked_pan = Column(String,default="")
+    expiry = Column(String,default="")
+    cvv = Column(String,default="")
+    status = Column(String,default="")
+    card_type = Column(String,default="")
+    issuer = Column(String,default="")
+    currency = Column(String,default="")
+    balance = Column(String,default="")
+    street = Column(String,default="")
+    city = Column(String,default="")
+    state = Column(String,default="")
+    postal_code = Column(String,default="")
+    country = Column(String,default="")
+    created_at = Column(String,default="")
+    updated_at = Column(String,default="")
+    user = relationship("UserModel",back_populates= "dollar_card")
+
+
+

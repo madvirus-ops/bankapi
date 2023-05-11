@@ -8,9 +8,17 @@ from dotenv import load_dotenv
 load_dotenv()
 from models import UserModel,MappleradCustomer
 import requests
+from dataclasses import dataclass
 
 web_secret = os.getenv("WEBHOOK_SECRET")
 secret_key = os.getenv('MAPLERAD_SECRET_KEY')
+headers = {
+        "accept": "application/json",
+        "content-type": "application/json",
+        "Authorization": f"Bearer {secret_key}"
+    }
+
+
 
 
 
@@ -35,11 +43,6 @@ def create_mapplerad_customer(user_id:str,db:Session):
         "email": "test@gg.com",
         "country": "NG"
     }
-    headers = {
-        "accept": "application/json",
-        "content-type": "application/json",
-        "Authorization": f"Bearer {secret_key}"
-    }
 
     #attempt to create the customer 
     response = requests.post(url, json=payload, headers=headers)
@@ -49,7 +52,7 @@ def create_mapplerad_customer(user_id:str,db:Session):
 
     #if the cusomer exist, there isn's a way to get the customer using email s
     # so extract all customers and find the exact one
-    elif response.json()['message'] == "customer is already enrolled" or response.status_code == 400:
+    elif response.json()['message'] == "customer is alcard enrolled" or response.status_code == 400:
         print("customer enrolled, how do i get the customer????")
         print(response.status_code)
         datas = None
@@ -76,9 +79,77 @@ def create_mapplerad_customer(user_id:str,db:Session):
         print("-====-ddnj-===")
         return None
 
+
+
 def get_create_mapplerad_customer(user_id,db:Session):
     customer = db.query(MappleradCustomer).filter(MappleradCustomer.user_id == user_id).first()
     if not customer:
         return "cusomer not found"
     return customer.customer_id
+
+
+
+def create_mapplerad_card(card_brand:str,user_id,db:Session):
+    customer = db.query(MappleradCustomer).filter(MappleradCustomer.user_id == user_id).first()
+    if not customer:
+        return "customer not found"
+    url = "https://sandbox.api.maplerad.com/v1/issuing"
+    payload = {
+                "customer_id": customer.customer_id,
+                "type": "VIRTUAL",
+                "auto_approve": True,
+                "brand": card_brand.upper(),
+                "amount": 200,
+                "currency": "USD"
+            }
+    response = requests.post(url, json=payload, headers=headers)
+    if response.status_code in (200,201):
+        print(response.json())
+        return {"reference":response.json()['data']['reference'],"customer_id":customer.customer_id}
+    else:
+        print(response.reason,response.status_code)
+        return None
+
+
+def get_virtual_card(user_id:str,card_id:str,db:Session):
+    customer = db.query(MappleradCustomer).filter(MappleradCustomer.user_id == user_id).first()
+    if not customer:
+        return "customer not found"
+    url = f"https://sandbox.api.maplerad.com/v1/issuing/{card_id}"
+    response = requests.get(url, headers=headers)
+
+    if response.status_code in (200,201):
+        print(response.json())
+        return response.json()['data']
+    else:
+        print(response.reason)
+        return response.text
+
+def save_virtual_card(card_id:str,card:dict,db:Session):
+
+    try:
+        card = db.query(VirtualCards).filter(VirtualCards.card_id == card_id).first()
+        if card is None:
+            return False
+        card.name = card['name']
+        card.card_number = card['card_number']
+        card.masked_pan = card['masked_pan']
+        card.expiry = card['expiry']
+        card.cvv = card['expiry']
+        card.status = card['status']
+        card.type = card['type']
+        card.issuer = card['issuer']
+        card.currency = card['currency']
+        card.balance = card['balance']
+        card.street = card['address']['street']
+        card.city = card['address']['city']
+        card.postal_code = card['address']['postal_code']
+        card.country = card['address']['country']
+        card.created_at = card['created_at']
+        
+        db.commit()
+        return card
+    except Exception as e:
+        print(e)
+        return False
 
