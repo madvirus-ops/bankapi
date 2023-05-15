@@ -6,9 +6,12 @@ import hashlib
 import base64
 from dotenv import load_dotenv
 load_dotenv()
-from models import UserModel,MappleradCustomer
+from models import UserModel,MappleradCustomer,VirtualCards
 import requests
 from dataclasses import dataclass
+from datetime import datetime,date
+
+
 
 web_secret = os.getenv("WEBHOOK_SECRET")
 secret_key = os.getenv('MAPLERAD_SECRET_KEY')
@@ -18,6 +21,7 @@ headers = {
         "Authorization": f"Bearer {secret_key}"
     }
 
+BASE_URL = "https://sandbox.api.maplerad.com/v1"
 
 
 
@@ -35,7 +39,7 @@ def create_mapplerad_customer(user_id:str,db:Session):
     if not user:
         return "user not found"
 
-    url = "https://sandbox.api.maplerad.com/v1/customers"
+    url = f"{BASE_URL}/customers"
 
     payload = {
         "first_name": user.first_name,
@@ -56,7 +60,7 @@ def create_mapplerad_customer(user_id:str,db:Session):
         print("customer enrolled, how do i get the customer????")
         print(response.status_code)
         datas = None
-        url = "https://sandbox.api.maplerad.com/v1/customers?page=1&page_size=10"
+        url = f"{BASE_URL}/customers?page=1&page_size=10"
         
         second_response = requests.get(url, headers=headers)
         
@@ -93,7 +97,7 @@ def create_mapplerad_card(card_brand:str,user_id,db:Session):
     customer = db.query(MappleradCustomer).filter(MappleradCustomer.user_id == user_id).first()
     if not customer:
         return "customer not found"
-    url = "https://sandbox.api.maplerad.com/v1/issuing"
+    url = f"{BASE_URL}/issuing"
     payload = {
                 "customer_id": customer.customer_id,
                 "type": "VIRTUAL",
@@ -115,7 +119,7 @@ def get_virtual_card(user_id:str,card_id:str,db:Session):
     customer = db.query(MappleradCustomer).filter(MappleradCustomer.user_id == user_id).first()
     if not customer:
         return "customer not found"
-    url = f"https://sandbox.api.maplerad.com/v1/issuing/{card_id}"
+    url = f"{BASE_URL}/issuing/{card_id}"
     response = requests.get(url, headers=headers)
 
     if response.status_code in (200,201):
@@ -123,7 +127,9 @@ def get_virtual_card(user_id:str,card_id:str,db:Session):
         return response.json()['data']
     else:
         print(response.reason)
-        return response.text
+        return None
+
+
 
 def save_virtual_card(card_id:str,card:dict,db:Session):
 
@@ -153,3 +159,89 @@ def save_virtual_card(card_id:str,card:dict,db:Session):
         print(e)
         return False
 
+class Encryptor:
+    def __init__(self,key1,key2):
+        self.key1 = key1
+        self.key2 = key2
+        self.fernet = MultiFernet([Fernet(self.key1), Fernet(self.key2)])
+        
+    
+    def encrypt(self, message):
+        token = self.fernet.encrypt(message)
+        return {"key1":self.key1,"key2":self.key2,"encrpted_toke":token}
+    
+    def decrypt(self, token):
+        message = self.fernet.decrypt(token)
+        return message.decode('utf-8')
+
+
+
+def fund_virtual_card(user_id:str,card_id:str,amount:int,db:Session):
+    try:
+        user = db.query(UserModel).filter(UserModel.id == user_id).first()
+        virtual_card = db.query(VirtualCards).filter(VirtualCards.user_id == user_id,VirtualCards.card_id == card_id).first()
+        url = f"{BASE_URL}/issuing/{card_id}/fund"
+
+        converted_amount = amount * 100
+
+        payload = {"amount": converted_amount}
+
+        response = requests.post(url, json=payload, headers=headers)
+
+        if response.status_code == 200 and response.json()['status'] == "true":
+            #we either update the balance from her or by webhook, for now i will leave blank
+            return response.json()
+        return None
+
+
+
+        print(response.text)
+    except Exception as e:
+        print(e)
+        return None
+
+
+def withdraw_virtual_card(user_id:str,card_id:str,amount:int,db:Session):
+    
+    user = db.query(UserModel).filter(UserModel.id == user_id).first()
+    virtual_card = db.query(VirtualCards).filter(VirtualCards.user_id == user_id,VirtualCards.card_id == card_id).first()
+
+    try:
+
+        url = f"{BASE_URL}/issuing/{card_id}/withdraw"
+
+        converted_amount = amount * 100
+        payload = {"amount": converted_amount }
+
+        response = requests.post(url, json=payload, headers=headers)
+        
+        if response.status_code == 200:
+            return response.json()
+        else:
+            return None
+
+        print(response.text)
+
+    except Exception as e:
+        print(e)
+        return None
+
+
+def get_all_card_transactions(user_id:str,card_id:str,start_date:date,end_date:date,page_size:str,page:str,db:Session):
+    try:   
+        user = db.query(UserModel).filter(UserModel.id == user_id).first()
+        virtual_card = db.query(VirtualCards).filter(VirtualCards.user_id == user_id,VirtualCards.card_id == card_id).first()
+
+
+        url = f"{BASE_URL}/issuing/{card_id}/transactions?start_date={start_date}&end_date={end_date}&page_size={page_size}&page={page}"
+
+        response = requests.get(url, headers=headers)
+
+        if response.status_code == 200:
+            return response.json()
+        return None
+
+        print(response.text)
+    except Exception as e:
+        print(e)
+        return None
