@@ -28,10 +28,12 @@ class UserModel(Base):
     password = Column(String)
     profile_image = Column(String,default='/media/profile_image/image.png')
     email_verified = Column(Boolean,default = False)
+    balance = Column(String,default="10")
+    dollar_balance = Column(String,default="10")
 
 
     pin = relationship("UserPin",back_populates="user",cascade="all, delete-orphan")
-    balance  = relationship("UserAccountBalance",back_populates="user",cascade="all, delete-orphan")
+    re_balance  = relationship("UserAccountBalance",back_populates="user",cascade="all, delete-orphan")
     blogs = relationship("BlogModel",back_populates="owner",cascade="all, delete-orphan")
     accounts = relationship("UserReservedAccount", back_populates = "user",cascade="all, delete-orphan")
     data_subscriptions = relationship("UserDataTransactions", back_populates = "user",cascade="all, delete-orphan")
@@ -103,7 +105,7 @@ class UserAccountBalance(Base):
     id = Column(Integer,primary_key=True,index=True)
     user_id = Column(Integer,ForeignKey('Users.id'))
     amount = Column(Integer, default = 0)
-    user = relationship("UserModel",back_populates= "balance")
+    user = relationship("UserModel",back_populates= "re_balance")
 
 
 
@@ -175,6 +177,7 @@ class VirtualCards(Base):
     country = Column(String,default="")
     created_at = Column(String,default="")
     updated_at = Column(String,default="")
+    reference = Column(String,default="")
     user = relationship("UserModel",back_populates= "dollar_card")
 
 

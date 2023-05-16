@@ -9,11 +9,12 @@ load_dotenv()
 from models import UserModel,MappleradCustomer,VirtualCards
 import requests
 from dataclasses import dataclass
+
 from datetime import datetime,date
 
 
 
-web_secret = os.getenv("WEBHOOK_SECRET")
+web_secret = os.getenv("MAPLERAD_WEBHOOK_KEY")
 secret_key = os.getenv('MAPLERAD_SECRET_KEY')
 headers = {
         "accept": "application/json",
@@ -127,6 +128,7 @@ def get_virtual_card(user_id:str,card_id:str,db:Session):
         return response.json()['data']
     else:
         print(response.reason)
+        print(response.json())
         return None
 
 
@@ -159,72 +161,102 @@ def save_virtual_card(card_id:str,card:dict,db:Session):
         print(e)
         return False
 
-class Encryptor:
-    def __init__(self,key1,key2):
-        self.key1 = key1
-        self.key2 = key2
-        self.fernet = MultiFernet([Fernet(self.key1), Fernet(self.key2)])
+# class Encryptor:
+#     def __init__(self,key1,key2):
+#         self.key1 = key1
+#         self.key2 = key2
+#         self.fernet = MultiFernet([Fernet(self.key1), Fernet(self.key2)])
         
     
-    def encrypt(self, message):
-        token = self.fernet.encrypt(message)
-        return {"key1":self.key1,"key2":self.key2,"encrpted_toke":token}
+#     def encrypt(self, message):
+#         token = self.fernet.encrypt(message)
+#         return {"key1":self.key1,"key2":self.key2,"encrpted_toke":token}
     
-    def decrypt(self, token):
-        message = self.fernet.decrypt(token)
-        return message.decode('utf-8')
+#     def decrypt(self, token):
+#         message = self.fernet.decrypt(token)
+#         return message.decode('utf-8')
 
 
 
-def fund_virtual_card(user_id:str,card_id:str,amount:int,db:Session):
+def fund_virtual_card(user_id:str,card_id:str,amount:str,db:Session):
     try:
         user = db.query(UserModel).filter(UserModel.id == user_id).first()
         virtual_card = db.query(VirtualCards).filter(VirtualCards.user_id == user_id,VirtualCards.card_id == card_id).first()
         url = f"{BASE_URL}/issuing/{card_id}/fund"
 
-        converted_amount = amount * 100
+        converted_amount = int(amount) * 100
+
+        if user.dollar_balance <= amount:
+            return {
+                "status":"False","code":400,
+                "message":"Insufficient Funds in Dollar Balance"
+            }
+
 
         payload = {"amount": converted_amount}
 
         response = requests.post(url, json=payload, headers=headers)
 
         if response.status_code == 200 and response.json()['status'] == "true":
-            #we either update the balance from her or by webhook, for now i will leave blank
-            return response.json()
-        return None
+            #remove from the dollar balance, no webhook for fund_card
+            virtual_card.balance += amount
+            user.dollar_balance -= amount
+            db.commit()
+            return {
+                "status":"Success","code":200,
+                "message":"Card Funded successfully"
+            }
+        
+        return response.json()
 
-
-
-        print(response.text)
     except Exception as e:
         print(e)
         return None
 
 
-def withdraw_virtual_card(user_id:str,card_id:str,amount:int,db:Session):
+def withdraw_virtual_card(user_id:str,card_id:str,amount:str,db:Session):
     
     user = db.query(UserModel).filter(UserModel.id == user_id).first()
     virtual_card = db.query(VirtualCards).filter(VirtualCards.user_id == user_id,VirtualCards.card_id == card_id).first()
 
     try:
 
+        if virtual_card.balance <= amount:
+            return {
+                "status":"False","code":400,
+                "message":"Insufficient Funds in Card Balance"
+            }
+
         url = f"{BASE_URL}/issuing/{card_id}/withdraw"
 
-        converted_amount = amount * 100
+        converted_amount = int(amount) * 100
         payload = {"amount": converted_amount }
 
         response = requests.post(url, json=payload, headers=headers)
         
-        if response.status_code == 200:
-            return response.json()
+        if response.status_code == 200 and response.json()['status'] == "true":
+            virtual_card.balance -= amount
+            user.dollar_balance += amount
+            
+            db.commit()
+            return {
+                "status":"Success","code":200,
+                "message":"Withdrawal successful"
+            }
+        
         else:
-            return None
+            return {
+                "status":"Failed","code":400,
+                "message":"Withdrawal Failed"
+            }
 
-        print(response.text)
 
     except Exception as e:
         print(e)
-        return None
+        return {
+                "status":"Failed","code":400,
+                "message":"Something Went Wrong"
+            }
 
 
 def get_all_card_transactions(user_id:str,card_id:str,start_date:date,end_date:date,page_size:str,page:str,db:Session):
@@ -245,3 +277,45 @@ def get_all_card_transactions(user_id:str,card_id:str,start_date:date,end_date:d
     except Exception as e:
         print(e)
         return None
+
+
+
+# {
+#   "event": "issuing.transaction",
+#   "type": "DEBIT",
+#   "amount": 987,
+#   "description": "NAME-CHEAP.COM*BJTYUN USA",
+#   "card_id": "900d4b96-e569-8440-cg98-ade24598079e",
+#   "currency": "USD",
+#   "reference": "98222216-d2ba-23a4-8055-76e91b24477e",
+#   "status": "SUCCESSFUL",
+#   "merchant": {
+#     "name": "NAME-CHEAP.COM",
+#     "city": "Phoenix", 
+#     "country": null, 
+#   },
+#   "created_at": "2023-03-01 13:06:53.498091884 +0000 UTC m=+4115.961033586",
+#   "updated_at": "2023-03-01 13:06:53.498096236 +0000 UTC m=+4115.961037934"
+# }
+
+def handle_maplerad_webhook(body:list,db:Session):
+
+    if body['event'] == "issuing.transaction":
+        event_type = body['type']
+        amount = body['amount']
+        description = body['description']
+        card_id = body['card_id']
+        reference = body['reference']
+        status = body['status']
+        created_at = body['created_at']
+        updated_at = body['updated_at']
+
+        formated_created = datetime.strptime(created_at, "%Y-%m-%d %H:%M:%S.%f %Z m=%f").strftime("%Y-%m-%d %H:%M:%S")
+        formated_updated = datetime.strptime(updated_at, "%Y-%m-%d %H:%M:%S.%f %Z m=%f").strftime("%Y-%m-%d %H:%M:%S")
+
+        card = db.query(VirtualCards).filter(VirtualCards.card_id == card_id).first()
+        card.balance -= amount
+        db.commit()
+    elif body['event'] == 
+
+

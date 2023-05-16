@@ -1,17 +1,18 @@
 
 import requests
 from fastapi import APIRouter,status,Depends,HTTPException,BackgroundTasks,Request
-from issuing.helpers import get_webhook_signature,create_mapplerad_customer,create_mapplerad_card,get_virtual_card,save_virtual_card
+from issuing.helpers import get_webhook_signature,create_mapplerad_customer,create_mapplerad_card,get_virtual_card,save_virtual_card,handle_maplerad_webhook,fund_virtual_card,withdraw_virtual_card
 from models import MappleradCustomer,UserModel,VirtualCards
 from utils import get_current_user
 from database import get_db
 from sqlalchemy.orm import Session
 
 
+
 router = APIRouter(prefix="/api/v1/card",tags=['issuing'])
 
 @router.post("/webhook")
-async def webhook_handler(request: Request):
+async def webhook_handler(request: Request,db:Session = Depends(get_db)):
     body = await request.body()
     svix_id = request.headers.get("svix-id")
     svix_timestamp = request.headers.get("svix-timestamp")
@@ -20,8 +21,11 @@ async def webhook_handler(request: Request):
     signature = get_webhook_signature(svix_id, svix_timestamp, body)
 
     if signature != svix_signature:
-        return JSONResponse(content={"message": "Invalid signature"}, status_code=400)
+        return {"message": "Invalid signature"}
+    re = handle_maplerad_webhook(body=body,db=db)
     print("webhook valid")
+
+    return re
 
 # 
 @router.post("/create-maplerad-customer")
@@ -50,7 +54,7 @@ async def create_virtual_card(user:dict= Depends(get_current_user),db:Session = 
         return "something went wrong"
     new_card = VirtualCards(
         user_id = user.id,
-        card_id = ready['reference'],
+        reference = ready['reference'],
         customer_id = ready['customer_id']
     )
     db.add(new_card)
@@ -63,10 +67,11 @@ async def create_virtual_card(user:dict= Depends(get_current_user),db:Session = 
 async def get_virtual_card_details(card_id:str,user:dict= Depends(get_current_user),db:Session = Depends(get_db)):
     if not user:
         raise "user not found"
-    ready = get_virtual_card(user_id=user.id, card_id=card_id, db=db)
+    
     customer = db.query(MappleradCustomer).filter(MappleradCustomer.user_id == user.id).first()
     if not customer:
         return "customer not found"
+    ready = get_virtual_card(user_id=user.id, card_id=card_id, db=db)
     if ready is None:
         return False
     card = db.query(VirtualCards).filter(VirtualCards.card_id == card_id).first()
@@ -74,6 +79,7 @@ async def get_virtual_card_details(card_id:str,user:dict= Depends(get_current_us
         new_card = VirtualCards(
             user_id = user.id,
             customer_id = customer.customer_id,
+            card_id = ready['id'],
                card_name = ready['name'],
                 card_number = ready['card_number'],
                 masked_pan = ready['masked_pan'],
@@ -99,4 +105,19 @@ async def get_virtual_card_details(card_id:str,user:dict= Depends(get_current_us
     if update is False:
         return "updating failed"
     return update
+
+@router.post("/fund-card")
+async def the_webhook_handler(card_id:str,amount:str,user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
+    card = fund_virtual_card(user_id=user.id,card_id=card_id,amount=amount,db=db)
+    return card
+
+@router.post("/withdraw-card")
+async def the_withdraw_from_card(card_id:str,amount:str,user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
+    card = withdraw_virtual_card(user_id=user.id,amount=amount,card_id=card_id,db=db)
+    return card
+
+@router.get("/user-card")
+async def get_user_acrds(user:dict = Depends(get_current_user),db:Session = Depends(get_db)):
+    crad = db.query(VirtualCards).filter(VirtualCards.user_id == user.id).all()
+    return crad
 
