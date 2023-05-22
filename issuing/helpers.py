@@ -27,11 +27,10 @@ BASE_URL = "https://sandbox.api.maplerad.com/v1"
 
 
 
-def get_webhook_signature(svix_id, svix_timestamp, body):
-    signed_content = f"{svix_id}.{svix_timestamp}.{body}"
-    secret_bytes = base64.b64decode(web_secret.split("_")[1])
-    signature = hmac.new(secret_bytes, signed_content.encode(), hashlib.sha256).digest()
-    return base64.b64encode(signature).decode()
+
+
+
+
 
 
 
@@ -61,6 +60,7 @@ def create_mapplerad_customer(user_id:str,db:Session):
         print("customer enrolled, how do i get the customer????")
         print(response.status_code)
         datas = None
+        
         url = f"{BASE_URL}/customers?page=1&page_size=10"
         
         second_response = requests.get(url, headers=headers)
@@ -297,9 +297,9 @@ def get_all_card_transactions(user_id:str,card_id:str,start_date:date,end_date:d
 #   "created_at": "2023-03-01 13:06:53.498091884 +0000 UTC m=+4115.961033586",
 #   "updated_at": "2023-03-01 13:06:53.498096236 +0000 UTC m=+4115.961037934"
 # }
-
-def handle_maplerad_webhook(body:list,db:Session):
-
+import json
+def handle_maplerad_webhook(re_body,db:Session):
+    body = json.loads(re_body)
     if body['event'] == "issuing.transaction":
         event_type = body['type']
         amount = body['amount']
@@ -316,6 +316,15 @@ def handle_maplerad_webhook(body:list,db:Session):
         card = db.query(VirtualCards).filter(VirtualCards.card_id == card_id).first()
         card.balance -= amount
         db.commit()
-    elif body['event'] == 
+    
+    elif body['event'] == 'issuing.created.successful':
+        
+        card_id = body['card']['id']
+        reference = body['reference']
 
-
+        card = db.query(VirtualCards).filter(VirtualCards.card_id == card_id).first()
+        if not card:
+            print("No card")
+            return False
+        card.card_id = card_id
+        db.commit()

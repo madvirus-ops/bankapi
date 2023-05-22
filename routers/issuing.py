@@ -1,12 +1,15 @@
 
 import requests
 from fastapi import APIRouter,status,Depends,HTTPException,BackgroundTasks,Request
-from issuing.helpers import get_webhook_signature,create_mapplerad_customer,create_mapplerad_card,get_virtual_card,save_virtual_card,handle_maplerad_webhook,fund_virtual_card,withdraw_virtual_card
+from issuing.helpers import create_mapplerad_customer,create_mapplerad_card,get_virtual_card,save_virtual_card,handle_maplerad_webhook,fund_virtual_card,withdraw_virtual_card
 from models import MappleradCustomer,UserModel,VirtualCards
 from utils import get_current_user
 from database import get_db
 from sqlalchemy.orm import Session
-
+from dotenv import load_dotenv
+load_dotenv()
+import os
+web_secret = os.getenv("MAPLERAD_WEBHOOK_KEY")
 
 
 router = APIRouter(prefix="/api/v1/card",tags=['issuing'])
@@ -14,15 +17,14 @@ router = APIRouter(prefix="/api/v1/card",tags=['issuing'])
 @router.post("/webhook")
 async def webhook_handler(request: Request,db:Session = Depends(get_db)):
     body = await request.body()
+    print(body)
     svix_id = request.headers.get("svix-id")
     svix_timestamp = request.headers.get("svix-timestamp")
     svix_signature = request.headers.get("svix-signature")
+    print(svix_id,svix_signature,svix_timestamp)
 
-    signature = get_webhook_signature(svix_id, svix_timestamp, body)
-
-    if signature != svix_signature:
-        return {"message": "Invalid signature"}
-    re = handle_maplerad_webhook(body=body,db=db)
+    
+    re = handle_maplerad_webhook(re_body=body,db=db)
     print("webhook valid")
 
     return re
