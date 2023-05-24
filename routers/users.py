@@ -9,6 +9,10 @@ from dotenv import load_dotenv
 load_dotenv()
 from crud import UserCrud
 from sqlalchemy.orm import Session 
+import googlemaps
+from datetime import datetime
+gmaps_key = os.getenv("GOOGLEMAPS_KEY")
+gmaps = googlemaps.Client(key=gmaps_key)
 
 
 router = APIRouter(prefix="/api/v1/user", tags=['users'])
@@ -152,3 +156,57 @@ async def upload_user_profile(image: UploadFile = File(...), user:dict=Depends(g
 #     except Exception as e:
 #         return e
 
+from pydantic import BaseModel
+
+class latlog(BaseModel):
+    lat:str
+    long:str 
+
+
+
+
+
+@router.post("/lat-long")
+async def get_gmaps_latlong_location(lat:latlog):
+    try:
+        reverse_geocode_result = gmaps.reverse_geocode((float(lat.lat), float(lat.long)))
+        result = reverse_geocode_result[0]
+        street_number = None
+        route = None
+        state = None
+        city = None
+        country = None
+        country_code = None
+        postal_code = None
+        formatted_address = result['formatted_address']
+
+        # Getting the required details from the response
+        for component in result['address_components']:
+            if 'street_number' in component['types']:
+                street_number = component['long_name']
+            elif 'route' in component['types']:
+                route = component['long_name']
+            elif 'administrative_area_level_1' in component['types']:
+                state = component['long_name']
+            elif 'administrative_area_level_2' in component['types']:
+                city = component['long_name']
+            elif 'country' in component['types']:
+                country = component['long_name']
+                country_code = component['short_name']
+            elif 'postal_code' in component['types']:
+                postal_code = component['long_name']
+
+        return {
+            'street_number': street_number,
+            'street': route,
+            'city': city,
+            'state': state,
+            'country': country,
+            'country_code':country_code,
+            'postal_code': postal_code,
+            'formatted_address': formatted_address
+        }
+
+    except Exception as e:
+        print(e.args)
+        return None
