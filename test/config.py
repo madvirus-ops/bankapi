@@ -72,7 +72,7 @@ def client(
 ) -> Generator[TestClient, Any, None]:
     """
     Create a new FastAPI TestClient that uses the `db_session` fixture to override
-    the `get_db` dependency that is injected into routes.
+    the `get_db` dependency that is injected into routes, also override the get_current_user
     """
 
     def _get_test_db():
