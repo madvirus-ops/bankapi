@@ -14,7 +14,24 @@ from fastapi.staticfiles import StaticFiles
 
 
 
-app = FastAPI(title="Meli Api",description="mimicking the backend of basic virtual top up app")
+def include_router(app):
+    app.include_router(authentication.router)
+    app.include_router(post.router)
+    app.include_router(users.router)
+    app.include_router(banking.router)
+    app.include_router(webhook.router)
+    app.include_router(virtual_tp.router)
+    app.include_router(admin_authentication.router)
+    app.include_router(admin.router)
+    app.include_router(issuing.router)
+
+
+def start_application():
+    app = FastAPI(title="Meli Api",description="mimicking the backend of basic virtual top up app")
+    include_router(app)
+    return app
+
+app = start_application()
 
 
 middleware = [
@@ -29,17 +46,7 @@ middleware = [
 
 
 
-models.Base.metadata.create_all(bind=engine)
 
-app.include_router(authentication.router)
-app.include_router(post.router)
-app.include_router(users.router)
-app.include_router(banking.router)
-app.include_router(webhook.router)
-app.include_router(virtual_tp.router)
-app.include_router(admin_authentication.router)
-app.include_router(admin.router)
-app.include_router(issuing.router)
 
 app.mount("/static", StaticFiles(directory="./static"), name="static")
 app.mount("/media/profile_image",StaticFiles(directory="./media/profile_image"),name="media")
@@ -59,16 +66,12 @@ async def home():
 
 app.on_event('startup')
 def do_some_precheck():
-    # cyb_key = os.getenv("CYBERDATA_KEY")
-    # url = 'https://cyberdata.ng/api/user/'
-    # headers = {
-    #     'Authorization': f'Token {cyb_key}',
-    #     'Content-Type': 'application/json'
-    # }
-    # response = requests.get(url,headers=headers)
-    # if response.status_code == 200:
-    #     # return response.json()
-    #     print(response.json())
-    # print(response.status_code,"===>",response.json())
     pass
     
+
+
+
+
+
+
+
