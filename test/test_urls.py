@@ -96,3 +96,10 @@ def test_create_user(client):
     response = client.post(url, json=data)
     assert response.status_code == 201
     assert response.json()["user"]["email"] == "testuser@nofoobar.com"
+
+
+def test_send_toverified_user_email(client):
+    url = auth_url + "/resend-email/?email=edwinayabie1@gmail.com"
+    response = client.post(url)
+    print(response.json())
+    assert response.status_code == 200

@@ -80,6 +80,8 @@ def client(
             yield db_session
         finally:
             pass
+    
+
 
     def _get_current_user():
         user = User(

@@ -50,21 +50,22 @@ async def create_user(request:schemas.User,task:BackgroundTasks,db:Session=Depen
 @router.post('/resend-email/')
 def resend_email_verification_code(task:BackgroundTasks,email:str, db:Session=Depends(get_db)):
     try:
-        User=get_user_by_email(email=email,db=db,model=models.UserModel)
+        # User=get_user_by_email(email=email,db=db,model=models.UserModel) #make active
         # if User.email_verifies:
         #     raise HTTPException(status_code=status.HTTP_207_MULTI_STATUS,detail="your email is verified")
-        token=verification_code(User.email) 
+        email = email #chnage to User.email in all 
+        token=verification_code(email) 
         message=MessageSchema(
             subject='Account Verification Email',
-            recipients=[User.email],
-            template_body={'token':token, 'user':f'{User.username}'},
+            recipients=[email],
+            template_body={'token':token, 'user':f'{"john beans"}'},
             subtype='html'
         )
         f=FastMail(env_config)
         task.add_task(f.send_message, message, template_name='verify_email.html')
         return {'message':'verification code sent'}
-    except:
-        raise HTTPException(detail='user with this email does not exists', status_code=400)
+    except Exception as e :
+        raise HTTPException(detail=f'{e.args}', status_code=400)
 
 
 
