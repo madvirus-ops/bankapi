@@ -54,7 +54,7 @@ async def get_banks(user:dict= Depends(get_current_user),db:Session = Depends(ge
     #     db.add(new_data)
     #     db.commit()
 
-    return "use the route "
+    return banks
     
 
 

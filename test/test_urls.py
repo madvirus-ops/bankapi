@@ -103,3 +103,22 @@ def test_send_toverified_user_email(client):
     response = client.post(url)
     print(response.json())
     assert response.status_code == 200
+
+def test_get_bank(client):
+    url = bank_url + '/banks/flutterwave'
+    response = client.get(url)
+    assert response.status_code == 200
+
+
+def test_get_user_acct(client):
+    url = bank_url + '/user/reserveAccounts'
+    response = client.get(url)
+    assert response.status_code == 200
+
+def test_get_bal(client):
+    url = bank_url + '/account/balance'
+    response = client.get(url)
+    assert response.status_code == 200
+
+
+
