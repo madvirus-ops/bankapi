@@ -35,10 +35,12 @@ class UploadWorker:
 
             s3_slave.upload(file,bucket,key,extra_args={"ACL":"public-read"})
 
+            public_url = f"https://{bucket}.s3.amazonaws.com/{key}"
+
             response = {
                 "status":"success","code":200,
                 "message":"upload In Progress",
-                "file_url":key
+                "file_url":key,"public_url":public_url
             }
             return response
 
