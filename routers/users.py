@@ -13,6 +13,9 @@ import googlemaps
 from datetime import datetime
 gmaps_key = os.getenv("GOOGLEMAPS_KEY")
 gmaps = googlemaps.Client(key=gmaps_key)
+from upload_worker import UploadWorker
+
+uploader = UploadWorker()
 
 
 router = APIRouter(prefix="/api/v1/user", tags=['users'])
@@ -113,14 +116,28 @@ async def upload_user_profile(image: UploadFile = File(...), user:dict=Depends(g
 
 
 
+def profile_image_upload(image,user_id:int,db:Session):
+    try:
+        user =  db.query(models.UserModel).filter(models.UserModel.id == user_id).first()
+
+        file = uploader.upload_file(file=image,user=user,upload_type="profile_image")
+
+        return file
+    except Exception as e:
+        print(e.args)
+        return False
 
 
 
 
 
 
-
-
+@router.post("/v2/image/upload")
+async def upload_image_file(user_id:str,file:UploadFile = File(...),db:Session = Depends(get_db)):
+    result = profile_image_upload(image=file,user_id=user_id,db=db)
+    if result != False:
+        return result
+    return {"message":"Something went wrong"}
 
 
 
