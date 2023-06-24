@@ -21,7 +21,7 @@ SessionLocal = sessionmaker(bind=engine,autocommit=False,autoflush=False)
 #     """
 #     with SessionLocal() as session:
 #         yield session 
-
+#Damn, i don write rubbish sha
 def get_db():
     """ ensures the database connection is always closed 
         to use this we have to use fastapi.Depends() as an argument in the routes
