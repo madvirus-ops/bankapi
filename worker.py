@@ -1,3 +1,6 @@
+"""i know, i know. this is beans. will scrap this and build a better one soon"""
+
+
 from database import get_db
 from sqlalchemy.orm import Session
 import json
